@@ -88,7 +88,7 @@ jobs:
         with:
           name: tv-${{ matrix.flavor }}-${{ matrix.abi }}-${{ inputs.build_type || 'debug' }}
           path: |
-            app/build/outputs/apk/${{ matrix.flavor }}/${{ matrix.abi }}/${{ inputs.build_type || 'debug' }}/*.apk
+            app/build/outputs/apk/**/*.apk
           retention-days: 7
 
   release:
