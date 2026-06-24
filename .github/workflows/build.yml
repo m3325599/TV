@@ -8,11 +8,12 @@ on:
   workflow_dispatch:
     inputs:
       build_type:
-        description: 'Build type (debug does not require signing)'
+        description: 'Build type'
         required: false
-        default: 'debug'
+        default: 'both'
         type: choice
         options:
+          - both
           - debug
           - release
 
@@ -27,6 +28,7 @@ jobs:
       matrix:
         flavor: [leanback, mobile]
         abi: [arm64_v8a, armeabi_v7a]
+        build_type: [debug, release]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,24 +54,28 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
           echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
           echo "sdk.dir=$ANDROID_HOME" > local.properties
-          echo "Android SDK path: $ANDROID_HOME"
-          ls -la $ANDROID_HOME/
-          echo "---"
-          echo "Installed platforms:"
-          ls -la $ANDROID_HOME/platforms/ 2>/dev/null || echo "No platforms found"
-          echo "---"
-          echo "Installed build-tools:"
-          ls -la $ANDROID_HOME/build-tools/ 2>/dev/null || echo "No build-tools found"
+
+      - name: Generate signing key for release
+        if: matrix.build_type == 'release'
+        run: |
+          keytool -genkeypair -v -keystore release.keystore \
+            -alias release -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android \
+            -keypass android \
+            -dname "CN=TV Box, OU=TV, O=TV, L=Beijing, ST=Beijing, C=CN"
+          echo "storeFile=../release.keystore" >> local.properties
+          echo "keyAlias=release" >> local.properties
+          echo "storePassword=android" >> local.properties
+          echo "keyPassword=android" >> local.properties
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build ${{ matrix.flavor }}-${{ matrix.abi }} APK
+      - name: Build ${{ matrix.flavor }}-${{ matrix.abi }} ${{ matrix.build_type }} APK
         run: |
-          BUILD_TYPE="${{ inputs.build_type || 'debug' }}"
           FLAVOR=$(echo "${{ matrix.flavor }}" | sed 's/^./\U&/')
           ABI=$(echo "${{ matrix.abi }}" | sed 's/^./\U&/')
-          BUILD_TYPE_CAP=$(echo "$BUILD_TYPE" | sed 's/^./\U&/')
+          BUILD_TYPE_CAP=$(echo "${{ matrix.build_type }}" | sed 's/^./\U&/')
           TASK="assemble${FLAVOR}${ABI}${BUILD_TYPE_CAP}"
           echo "Running task: $TASK"
           ./gradlew "$TASK" --no-daemon --stacktrace
@@ -86,34 +92,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: tv-${{ matrix.flavor }}-${{ matrix.abi }}-${{ inputs.build_type || 'debug' }}
+          name: tv-${{ matrix.flavor }}-${{ matrix.abi }}-${{ matrix.build_type }}
           path: |
             app/build/outputs/apk/**/*.apk
           retention-days: 7
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') && inputs.build_type == 'release'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./apks
-
-      - name: Display structure of downloaded files
-        run: ls -laR ./apks
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref }}
-          name: TV Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-          files: |
-            ./apks/**/*.apk

@@ -17,7 +17,7 @@ android {
     compileSdk libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
-        applicationId "com.fongmi.android.tv"
+        applicationId "com.tvbox.custom"
         minSdk libs.versions.minSdk.get().toInteger()
         targetSdk libs.versions.targetSdk.get().toInteger()
         versionCode 552
@@ -70,8 +70,8 @@ android {
             shrinkResources = false
         }
         release {
-            minifyEnabled = true
-            shrinkResources = true
+            minifyEnabled = false
+            shrinkResources = false
             if (hasSigningConfig) {
                 signingConfig = signingConfigs.release
             }
