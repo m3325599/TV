@@ -449,11 +449,6 @@ public class PlayerManager implements ParseCallback {
         }
 
         @Override
-        public void onMediaTitlesChanged(@NonNull List<MediaTitle> titles) {
-            callback.onTitlesChanged();
-        }
-
-        @Override
         public void onPlayerError(@NonNull PlaybackException e) {
             PlayerEngine.ErrorAction action = engine.handleError(e);
             if (action == PlayerEngine.ErrorAction.RECOVERED) {

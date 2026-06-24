@@ -121,12 +121,12 @@ public class ExoPlayerEngine implements PlayerEngine {
 
     @Override
     public boolean haveTitle() {
-        return !player.getCurrentMediaTitles().isEmpty();
+        return false;
     }
 
     @Override
     public List<MediaTitle> getCurrentMediaTitles() {
-        return player.getCurrentMediaTitles();
+        return Collections.emptyList();
     }
 
     @Override
