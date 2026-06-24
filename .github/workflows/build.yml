@@ -18,8 +18,6 @@ on:
 
 env:
   JAVA_VERSION: '21'
-  ANDROID_COMPILE_SDK: '37'
-  ANDROID_BUILD_TOOLS: '37.0.0'
 
 jobs:
   build:
@@ -44,44 +42,39 @@ jobs:
         with:
           cache-write-only: true
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: |
-            platforms;android-${{ env.ANDROID_COMPILE_SDK }}
-            build-tools;${{ env.ANDROID_BUILD_TOOLS }}
-
-      - name: Create local.properties
+      - name: Configure Android SDK
         run: |
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
           echo "sdk.dir=$ANDROID_HOME" > local.properties
-          cat local.properties
+          echo "Android SDK path: $ANDROID_HOME"
+          ls -la $ANDROID_HOME/
+          echo "---"
+          echo "Installed platforms:"
+          ls -la $ANDROID_HOME/platforms/ 2>/dev/null || echo "No platforms found"
+          echo "---"
+          echo "Installed build-tools:"
+          ls -la $ANDROID_HOME/build-tools/ 2>/dev/null || echo "No build-tools found"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Verify Gradle tasks
-        run: |
-          ./gradlew tasks --no-daemon --quiet 2>&1 | grep -i "assemble" | head -20 || true
-
       - name: Build ${{ matrix.flavor }}-${{ matrix.abi }} APK
         run: |
           BUILD_TYPE="${{ inputs.build_type || 'debug' }}"
-          # Capitalize first letter of flavor
           FLAVOR=$(echo "${{ matrix.flavor }}" | sed 's/^./\U&/')
-          # Capitalize first letter of abi
           ABI=$(echo "${{ matrix.abi }}" | sed 's/^./\U&/')
-          # Capitalize first letter of build type
           BUILD_TYPE_CAP=$(echo "$BUILD_TYPE" | sed 's/^./\U&/')
           TASK="assemble${FLAVOR}${ABI}${BUILD_TYPE_CAP}"
           echo "Running task: $TASK"
           ./gradlew "$TASK" --no-daemon --stacktrace
         env:
           JAVA_OPTS: -Xmx4g
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
 
       - name: List APK outputs
         if: success()
         run: |
-          BUILD_TYPE="${{ inputs.build_type || 'debug' }}"
           find app/build/outputs/apk -name "*.apk" -ls
 
       - name: Upload APK
