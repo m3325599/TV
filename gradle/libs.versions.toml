@@ -13,6 +13,7 @@ leanback = "1.2.0"
 lifecycleService = "2.10.0"
 media = "1.8.0"
 media3 = "1.4.1"
+nextlib = "1.8.0-0.9.0"
 palette = "1.0.0"
 preference = "1.2.1"
 recyclerview = "1.4.0"
@@ -65,6 +66,8 @@ media3-session = { group = "androidx.media3", name = "media3-session", version.r
 media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
 media3-datasource = { group = "androidx.media3", name = "media3-datasource", version.ref = "media3" }
 media3-database = { group = "androidx.media3", name = "media3-database", version.ref = "media3" }
+media3-datasource-okhttp = { group = "androidx.media3", name = "media3-datasource-okhttp", version.ref = "media3" }
+nextlib-media3ext = { group = "io.github.anilbeesetti", name = "nextlib-media3ext", version.ref = "nextlib" }
 palette = { group = "androidx.palette", name = "palette", version.ref = "palette" }
 preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
 recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }

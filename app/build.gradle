@@ -133,6 +133,8 @@ dependencies {
     implementation libs.media3.ui
     implementation libs.media3.datasource
     implementation libs.media3.database
+    implementation libs.media3.datasource.okhttp
+    implementation libs.nextlib.media3ext
     implementation libs.palette
     implementation libs.recyclerview
     implementation libs.room.runtime
