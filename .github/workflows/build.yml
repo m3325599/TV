@@ -18,11 +18,14 @@ on:
 
 env:
   JAVA_VERSION: '21'
+  ANDROID_COMPILE_SDK: '37'
+  ANDROID_BUILD_TOOLS: '37.0.0'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         flavor: [leanback, mobile]
         abi: [arm64_v8a, armeabi_v7a]
@@ -35,29 +38,54 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
-          cache: 'gradle'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-write-only: true
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: |
+            platforms;android-${{ env.ANDROID_COMPILE_SDK }}
+            build-tools;${{ env.ANDROID_BUILD_TOOLS }}
 
       - name: Create local.properties
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
+          cat local.properties
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Verify Gradle tasks
+        run: |
+          ./gradlew tasks --no-daemon --quiet 2>&1 | grep -i "assemble" | head -20 || true
+
       - name: Build ${{ matrix.flavor }}-${{ matrix.abi }} APK
         run: |
-          # Capitalize flavor and abi for Gradle task name
-          FLAVOR_CAP=$(echo "${{ matrix.flavor }}" | sed 's/.*/\u&/')
-          ABI_CAP=$(echo "${{ matrix.abi }}" | sed 's/./\u&/')
-          BUILD_TYPE_CAP=$(echo "${{ inputs.build_type || 'debug' }}" | sed 's/.*/\u&/')
-          ./gradlew assemble${FLAVOR_CAP}${ABI_CAP}${BUILD_TYPE_CAP} --no-daemon --stacktrace
+          BUILD_TYPE="${{ inputs.build_type || 'debug' }}"
+          # Capitalize first letter of flavor
+          FLAVOR=$(echo "${{ matrix.flavor }}" | sed 's/^./\U&/')
+          # Capitalize first letter of abi
+          ABI=$(echo "${{ matrix.abi }}" | sed 's/^./\U&/')
+          # Capitalize first letter of build type
+          BUILD_TYPE_CAP=$(echo "$BUILD_TYPE" | sed 's/^./\U&/')
+          TASK="assemble${FLAVOR}${ABI}${BUILD_TYPE_CAP}"
+          echo "Running task: $TASK"
+          ./gradlew "$TASK" --no-daemon --stacktrace
         env:
           JAVA_OPTS: -Xmx4g
 
+      - name: List APK outputs
+        if: success()
+        run: |
+          BUILD_TYPE="${{ inputs.build_type || 'debug' }}"
+          find app/build/outputs/apk -name "*.apk" -ls
+
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: tv-${{ matrix.flavor }}-${{ matrix.abi }}-${{ inputs.build_type || 'debug' }}
@@ -65,11 +93,10 @@ jobs:
             app/build/outputs/apk/${{ matrix.flavor }}/${{ matrix.abi }}/${{ inputs.build_type || 'debug' }}/*.apk
           retention-days: 7
 
-  # Release job - only runs on tags and when release build is requested
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') && (inputs.build_type == 'release' || inputs.build_type == '')
+    if: startsWith(github.ref, 'refs/tags/') && inputs.build_type == 'release'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
