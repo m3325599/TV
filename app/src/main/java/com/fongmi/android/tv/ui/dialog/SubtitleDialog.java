@@ -22,6 +22,8 @@ public final class SubtitleDialog extends BaseBottomSheetDialog {
 
     private DialogSubtitleBinding binding;
     private SubtitleView subtitleView;
+    private float position;
+    private float textSize;
 
     public static SubtitleDialog create() {
         return new SubtitleDialog();
@@ -29,6 +31,8 @@ public final class SubtitleDialog extends BaseBottomSheetDialog {
 
     public SubtitleDialog view(SubtitleView subtitleView) {
         this.subtitleView = subtitleView;
+        this.position = PlayerSetting.getSubtitlePosition();
+        this.textSize = PlayerSetting.getSubtitleTextSize();
         return this;
     }
 
@@ -67,29 +71,36 @@ public final class SubtitleDialog extends BaseBottomSheetDialog {
     }
 
     private void onUp(View view) {
-        subtitleView.addPosition(0.005f);
-        PlayerSetting.putSubtitlePosition(subtitleView.getPosition());
+        position = Math.max(0.0f, position - 0.005f);
+        subtitleView.setBottomPaddingFraction(position);
+        PlayerSetting.putSubtitlePosition(position);
     }
 
     private void onDown(View view) {
-        subtitleView.subPosition(0.005f);
-        PlayerSetting.putSubtitlePosition(subtitleView.getPosition());
+        position = Math.min(0.5f, position + 0.005f);
+        subtitleView.setBottomPaddingFraction(position);
+        PlayerSetting.putSubtitlePosition(position);
     }
 
     private void onLarge(View view) {
-        subtitleView.addTextSize(0.002f);
-        PlayerSetting.putSubtitleTextSize(subtitleView.getTextSize());
+        textSize = textSize + 0.002f;
+        subtitleView.setFractionalTextSize(textSize);
+        PlayerSetting.putSubtitleTextSize(textSize);
     }
 
     private void onSmall(View view) {
-        subtitleView.subTextSize(0.002f);
-        PlayerSetting.putSubtitleTextSize(subtitleView.getTextSize());
+        textSize = Math.max(0.0f, textSize - 0.002f);
+        subtitleView.setFractionalTextSize(textSize);
+        PlayerSetting.putSubtitleTextSize(textSize);
     }
 
     private void onReset(View view) {
-        PlayerSetting.putSubtitleTextSize(0.0f);
-        PlayerSetting.putSubtitlePosition(0.0f);
-        subtitleView.reset();
+        position = 0.0f;
+        textSize = 0.0f;
+        PlayerSetting.putSubtitleTextSize(textSize);
+        PlayerSetting.putSubtitlePosition(position);
+        subtitleView.setBottomPaddingFraction(SubtitleView.DEFAULT_BOTTOM_PADDING_FRACTION);
+        subtitleView.setFractionalTextSize(SubtitleView.DEFAULT_TEXT_SIZE_FRACTION);
     }
 
     @Override

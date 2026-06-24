@@ -10,6 +10,7 @@ import androidx.media3.ui.danmaku.DanmakuController;
 public class CustomPlayerView extends PlayerView {
 
   private DanmakuController danmakuController;
+  private int render;
 
   public CustomPlayerView(Context context) {
     super(context);
@@ -32,5 +33,13 @@ public class CustomPlayerView extends PlayerView {
 
   public DanmakuController getDanmakuController() {
     return danmakuController;
+  }
+
+  public void setRender(int render) {
+    this.render = render;
+  }
+
+  public int getRender() {
+    return render;
   }
 }

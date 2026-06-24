@@ -16,7 +16,7 @@ import androidx.media3.common.VideoSize;
 import androidx.media3.exoplayer.drm.FrameworkMediaDrm;
 import androidx.media3.session.MediaController;
 import androidx.media3.session.SessionToken;
-import androidx.media3.ui.PlayerView;
+import com.fongmi.android.tv.ui.custom.CustomPlayerView;
 
 import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.bean.Result;
@@ -94,7 +94,7 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
 
     protected abstract CustomSeekView getSeekView();
 
-    protected abstract PlayerView getExoView();
+    protected abstract CustomPlayerView getExoView();
 
     protected abstract String getPlaybackKey();
 
