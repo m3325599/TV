@@ -49,7 +49,11 @@ jobs:
 
       - name: Build ${{ matrix.flavor }}-${{ matrix.abi }} APK
         run: |
-          ./gradlew assemble${{ matrix.flavor }}${{ matrix.abi }}${{ inputs.build_type || 'debug' }} --no-daemon --stacktrace
+          # Capitalize flavor and abi for Gradle task name
+          FLAVOR_CAP=$(echo "${{ matrix.flavor }}" | sed 's/.*/\u&/')
+          ABI_CAP=$(echo "${{ matrix.abi }}" | sed 's/./\u&/')
+          BUILD_TYPE_CAP=$(echo "${{ inputs.build_type || 'debug' }}" | sed 's/.*/\u&/')
+          ./gradlew assemble${FLAVOR_CAP}${ABI_CAP}${BUILD_TYPE_CAP} --no-daemon --stacktrace
         env:
           JAVA_OPTS: -Xmx4g
 
