@@ -3,9 +3,13 @@ plugins {
 }
 
 def localProps = new Properties()
-rootProject.file('local.properties').withInputStream {
-    localProps.load(it)
+if (rootProject.file('local.properties').exists()) {
+    rootProject.file('local.properties').withInputStream {
+        localProps.load(it)
+    }
 }
+
+def hasSigningConfig = localProps['storeFile'] != null
 
 android {
     namespace = 'com.fongmi.android.tv'
@@ -50,19 +54,27 @@ android {
     }
 
     signingConfigs {
-        release {
-            storeFile file(localProps['storeFile'])
-            keyAlias localProps['keyAlias']
-            keyPassword localProps['storePassword']
-            storePassword localProps['storePassword']
+        if (hasSigningConfig) {
+            release {
+                storeFile file(localProps['storeFile'])
+                keyAlias localProps['keyAlias']
+                keyPassword localProps['storePassword']
+                storePassword localProps['storePassword']
+            }
         }
     }
 
     buildTypes {
+        debug {
+            minifyEnabled = false
+            shrinkResources = false
+        }
         release {
             minifyEnabled = true
             shrinkResources = true
-            signingConfig = signingConfigs.release
+            if (hasSigningConfig) {
+                signingConfig = signingConfigs.release
+            }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro', 'proguard-rules-media.pro'
         }
     }
@@ -95,6 +107,14 @@ androidComponents {
         def abi = flavors['abi'] ?: 'abi'
         variant.outputs.each { output ->
             output.outputFileName.set("${mode}-${abi}.apk")
+        }
+    }
+    onVariants(selector().withBuildType('debug')) { variant ->
+        def flavors = variant.productFlavors.collectEntries { [(it.first): it.second] }
+        def mode = flavors['mode'] ?: 'mode'
+        def abi = flavors['abi'] ?: 'abi'
+        variant.outputs.each { output ->
+            output.outputFileName.set("${mode}-${abi}-debug.apk")
         }
     }
 }

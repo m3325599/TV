@@ -1,7 +1,7 @@
 .idea
 .vscode
 .gradle
-.github
+# .github  # 不忽略 .github 目录，保留 workflow 文件
 .settings
 *build
 *.jks

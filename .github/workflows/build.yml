@@ -1,0 +1,90 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, master, fongmi ]
+  pull_request:
+    branches: [ main, master, fongmi ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type (debug does not require signing)'
+        required: false
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+
+env:
+  JAVA_VERSION: '21'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flavor: [leanback, mobile]
+        abi: [arm64_v8a, armeabi_v7a]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Create local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build ${{ matrix.flavor }}-${{ matrix.abi }} APK
+        run: |
+          ./gradlew assemble${{ matrix.flavor }}${{ matrix.abi }}${{ inputs.build_type || 'debug' }} --no-daemon --stacktrace
+        env:
+          JAVA_OPTS: -Xmx4g
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: tv-${{ matrix.flavor }}-${{ matrix.abi }}-${{ inputs.build_type || 'debug' }}
+          path: |
+            app/build/outputs/apk/${{ matrix.flavor }}/${{ matrix.abi }}/${{ inputs.build_type || 'debug' }}/*.apk
+          retention-days: 7
+
+  # Release job - only runs on tags and when release build is requested
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') && (inputs.build_type == 'release' || inputs.build_type == '')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./apks
+
+      - name: Display structure of downloaded files
+        run: ls -laR ./apks
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref }}
+          name: TV Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            ./apks/**/*.apk

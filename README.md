@@ -1,147 +1,90 @@
-# 開發者文件
+# TV Android 应用
 
-基於 [CatVod](https://github.com/CatVodTVOfficial/CatVodTVJarLoader) 的開源 Android 影音應用程式，同時支援 **Android TV 大螢幕**與**手機**兩種使用情境，並且透過外部配置靈活擴展內容。
+基于 CatVod 的开源 Android 影音应用程序，同时支持 **Android TV 大屏幕**与**手机**两种使用场景。
 
-[討論群組](https://t.me/fongmi_official) | [發布頻道](https://t.me/fongmi_release)
+## GitHub Actions 自动构建
 
-[![Star History Chart](https://api.star-history.com/svg?repos=FongMi/TV&type=Date)](https://www.star-history.com/#FongMi/TV&Date)
+本项目配置了 GitHub Actions Workflow，可以自动编译 Release 版本的 APK。
 
----
+### 触发构建的方式
 
-## 目錄
+1. **推送到 main/master 分支**：每当代码推送到 main 或 master 分支时，会自动触发构建
+2. **创建 Tag**：创建 Git Tag 时会自动构建并发布 Release
+3. **手动触发**：在 GitHub Actions 页面手动运行 workflow
 
-- [專案架構](#專案架構)
-- [播放器](#播放器)
-- [點播功能](#點播功能)
-- [直播功能](#直播功能)
-- [爬蟲引擎](#爬蟲引擎)
-- [網路功能](#網路功能)
-- [DLNA 投放](#dlna-投放)
-- [Android Auto](#android-auto)
-- [遠端控制](#遠端控制)
-- [配置說明](#配置說明)
-- [延伸閱讀](#延伸閱讀)
+### 构建产物
 
----
+Workflow 会构建以下 APK：
 
-## 專案架構
+- **TV (Leanback)**:
+  - `leanback-arm64_v8a-release.apk` - 适用于 arm64 架构设备
+  - `leanback-armeabi_v7a-release.apk` - 适用于 armeabi 架构设备
 
-| 項目      | 值                             |
-|---------|-------------------------------|
-| package | `com.fongmi.android.tv`       |
-| minSdk  | 24（Android 7.0 Nougat）        |
-| abi     | `arm64-v8a`、`armeabi-v7a`     |
-| flavor  | `leanback`（電視版）、`mobile`（手機版） |
+- **Mobile**:
+  - `mobile-arm64_v8a-release.apk` - 适用于 arm64 架构设备
+  - `mobile-armeabi_v7a-release.apk` - 适用于 armeabi 架构设备
 
+### 配置签名密钥（可选）
+
+如果需要发布签名的 Release APK，需要配置以下 GitHub Secrets：
+
+1. 在 GitHub 仓库 Settings → Secrets and variables → Actions 中添加以下 Secrets：
+
+   | Secret 名称 | 说明 | 示例 |
+   |------------|------|------|
+   | `SIGNING_STORE_FILE` | Base64 编码的 keystore 文件 | `$(base64 -w0 your-keystore.jks)` |
+   | `SIGNING_KEY_ALIAS` | Key alias 名称 | `your-key-alias` |
+   | `SIGNING_STORE_PASSWORD` | Keystore 密码 | `your-store-password` |
+   | `SIGNING_KEY_PASSWORD` | Key 密码 | `your-key-password` |
+
+2. 生成 Secrets 的方法：
+
+   ```bash
+   # 将 keystore 文件转为 Base64
+   base64 -w0 your-keystore.jks | pbcopy  # macOS
+   base64 -w0 your-keystore.jks           # Linux
+
+   # 在 GitHub Secrets 中填入生成的 Base64 字符串
+   ```
+
+### 本地构建
+
+```bash
+# 克隆项目
+git clone https://github.com/m3325599/TV.git
+cd TV
+
+# 构建 TV 版本（arm64_v8a）
+./gradlew assembleLeanbackArm64_v8aRelease
+
+# 构建 TV 版本（armeabi_v7a）
+./gradlew assembleLeanbackArmeabi_v7aRelease
+
+# 构建手机版本（arm64_v8a）
+./gradlew assembleMobileArm64_v8aRelease
+
+# 构建手机版本（armeabi_v7a）
+./gradlew assembleMobileArmeabi_v7aRelease
 ```
-TV/
-├── app/            主應用程式（含兩套 UI Flavor）
-├── catvod/         爬蟲抽象層（Spider 介面、OkHttp 網路棧）
-├── quickjs/        QuickJS JavaScript 引擎
-├── chaquo/         Chaquopy Python 引擎
-```
 
-`app/src/main/` 為兩個版本共用的業務邏輯，`app/src/leanback/` 與 `app/src/mobile/` 各自實作對應 UI。
+### 发布版本
 
----
+1. 创建并推送 Tag：
 
-## 播放器
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
 
-- **核心**：ExoPlayer（Media3）+ FFmpeg 軟解，硬解 / 軟解自動降級切換
-- **渲染**：SurfaceView / TextureView
-- **DRM**：Widevine、PlayReady、ClearKey，支援 `#KODIPROP` 宣告
-- **彈幕**：DanmakuFlameMaster，與播放時間軸精確同步，支援遠端推送
-- **字幕**：SRT / SSA / ASS 外掛字幕、系統 CaptioningManager、遠端即時注入
-- **其他**：倍速、多縮放比例、畫中畫（PiP）、背景音訊、片頭 / 片尾自動跳過
+2. GitHub Actions 会自动：
+   - 构建所有 APK
+   - 创建 GitHub Release
+   - 上传所有 APK 作为 Release 附件
 
----
+### 注意事项
 
-## 點播功能
-
-- 多站點分類瀏覽，Filter 篩選（年份 / 地區 / 類型等）
-- 多站點**並行搜尋**，關鍵字自動繁轉簡提升相容性
-- 播放失敗自動換源：解析器 → 線路 → 搜尋其他站 → 下一站點
-- 觀看記錄（保留 60 天）、收藏、無痕模式
-- 電視版使用遙控器操作；手機版支援手勢（亮度 / 音量 / 進度）、上下滑切集、螢幕旋轉與鎖定
-
----
-
-## 直播功能
-
-- 支援 M3U、TXT（`#genre#` 分組）、JSON 三種直播源格式
-- **EPG**：XMLTV 格式（支援 `.gz`），每 6 小時自動刷新
-- **追看 / 時移**：`append`、`pltv` 等多種類型
-- 頻道收藏、隱藏分組密碼保護
-- 特殊引擎：TVBus、ForceTech
-
----
-
-## 爬蟲引擎
-
-支援三種語言撰寫爬蟲：
-
-- Java JAR（DexClassLoader）
-- JavaScript（QuickJS）
-- Python（Chaquopy）
-
-透過 `api` 欄位指定爬蟲，`ext` 欄位傳入初始化參數。完整 API 規格見 [SPIDER.md](docs/SPIDER.md)。
-
----
-
-## 網路功能
-
-- **DoH**：DNS over HTTPS，支援 Bootstrap IP
-- **代理**：HTTP / HTTPS / SOCKS4 / SOCKS5，依 host 正則規則動態選擇
-- **Hosts**：DNS 解析覆蓋，支援萬用字元 `*`
-- **CORS 注入**：依 host 規則在回應中注入自訂標頭
-- **廣告攔截**：`ads` 黑名單，符合域名直接攔截
-- **WebView 嗅探**：Sniffer 以 regex 攔截媒體 URL；支援 UA 偽裝
-
----
-
-## DLNA 投放
-
-- **DMC（投放端）**：手機版，掃描區域網路 DLNA 設備並投放媒體
-- **DMR（被投放端）**：電視版，作為 DLNA Renderer 接收其他設備投放
-
-使用 JUPnP 3.0.4（UPnP），支援 play / pause / stop / seek / next / repeat 控制，可傳遞自訂 HTTP 標頭（User-Agent、Referer 等）至目標串流。
-
----
-
-## Android Auto
-
-電視版支援 Android Auto，PlaybackService 實作 MediaLibraryService，可在車機上瀏覽播放記錄與直播頻道：
-
-- **點播**：歷史記錄條目可直接續播，恢復上次進度
-- **直播**：依分組瀏覽頻道，可直接選台
-- **播放控制**：支援車機端 play / pause / prev / next / stop
-- **懶加載**：App 退出後 Auto 仍保持連線，配置自動重新載入
-
----
-
-## 遠端控制
-
-應用啟動後綁定本地 HTTP 伺服器（NanoHTTPD），埠號從 **9978** 起自動偵測至 **9998**，可用於播放控制、推送字幕 / 彈幕、多裝置同步等。完整端點說明見 [LOCAL.md](docs/LOCAL.md)。
-
----
-
-## 配置說明
-
-Vod 配置為應用主要入口，透過 URL 或本地路徑載入，頂層欄位定義：
-
-- 點播站點（`sites`）、解析規則（`parses`）
-- 直播來源（`lives`）
-- 網路設定（`doh`、`proxy`、`hosts`、`ads`）
-
-Live 配置可內嵌或獨立存放。完整欄位說明見 [CONFIG.md](docs/CONFIG.md)。
-
----
-
-## 延伸閱讀
-
-| 文件                          | 說明                   |
-|-----------------------------|----------------------|
-| [CONFIG.md](docs/CONFIG.md) | Vod / Live 完整配置欄位說明  |
-| [SPIDER.md](docs/SPIDER.md) | Spider 所有方法規格與回傳格式   |
-| [LOCAL.md](docs/LOCAL.md)   | 本地 HTTP API 所有端點完整說明 |
-| [LIVE.md](docs/LIVE.md)     | 直播來源格式完整說明           |
+- 编译 SDK 版本：37
+- 最低支持 Android 版本：7.0 (API 24)
+- Java 版本：21
+- 项目使用 Chaquopy 支持 Python 爬虫
+- Release 构建需要签名配置，否则生成的 APK 将是未签名状态
