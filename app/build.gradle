@@ -135,7 +135,6 @@ dependencies {
     implementation libs.media3.database
     implementation libs.media3.datasource.okhttp
     implementation libs.media3.exoplayer.hls
-    implementation libs.jellyfin.ffmpeg.decoder
     implementation libs.nextlib.media3ext
     implementation libs.palette
     implementation libs.recyclerview
