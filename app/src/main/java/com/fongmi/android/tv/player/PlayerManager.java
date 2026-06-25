@@ -54,7 +54,7 @@ public class PlayerManager implements ParseCallback {
 
     public PlayerManager(Callback callback) {
         this.runnable = () -> callback.onError(ResUtil.getString(R.string.error_play_timeout));
-        this.engine = new ExoPlayerEngine(PlayerEngine.HARD, listener);
+        this.engine = new ExoPlayerEngine(PlayerEngine.SOFT, listener);
         this.player = engine.getPlayer();
         this.callback = callback;
     }

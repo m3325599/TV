@@ -88,11 +88,24 @@ jobs:
         run: |
           find app/build/outputs/apk -name "*.apk" -ls
 
+      - name: Rename APK with run number
+        if: success()
+        run: |
+          RUN_NUM=${{ github.run_number }}
+          mkdir -p apk_output
+          for apk in $(find app/build/outputs/apk -name "*.apk"); do
+            basename=$(basename "$apk")
+            newname="tv-r${RUN_NUM}-${basename}"
+            cp "$apk" "apk_output/$newname"
+            echo "Renamed: $basename -> $newname"
+          done
+          ls -lh apk_output/
+
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: tv-${{ matrix.flavor }}-${{ matrix.abi }}-${{ matrix.build_type }}
+          name: tv-${{ matrix.flavor }}-${{ matrix.abi }}-${{ matrix.build_type }}-r${{ github.run_number }}
           path: |
-            app/build/outputs/apk/**/*.apk
+            apk_output/*.apk
           retention-days: 7
