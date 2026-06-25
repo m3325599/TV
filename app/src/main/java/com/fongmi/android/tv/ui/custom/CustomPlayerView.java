@@ -29,8 +29,6 @@ public class CustomPlayerView extends PlayerView {
 
   private void init() {
     danmakuController = new DanmakuController(getContext());
-    setUseController(false);
-    setSurfaceType(render == 1 ? SURFACE_TYPE_TEXTURE_VIEW : SURFACE_TYPE_SURFACE_VIEW);
   }
 
   public DanmakuController getDanmakuController() {
@@ -39,7 +37,6 @@ public class CustomPlayerView extends PlayerView {
 
   public void setRender(int render) {
     this.render = render;
-    setSurfaceType(render == 1 ? SURFACE_TYPE_TEXTURE_VIEW : SURFACE_TYPE_SURFACE_VIEW);
   }
 
   public int getRender() {
