@@ -99,7 +99,16 @@ public class ExoUtil {
     }
 
     private static LoadControl buildLoadControl() {
-        return new DefaultLoadControl.Builder().setBufferDurationsMs(DefaultLoadControl.DEFAULT_MIN_BUFFER_MS * PlayerSetting.getBuffer(), DefaultLoadControl.DEFAULT_MAX_BUFFER_MS * PlayerSetting.getBuffer(), DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS, DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS).build();
+        int bufferMultiplier = PlayerSetting.getBuffer();
+        return new DefaultLoadControl.Builder()
+                .setBufferDurationsMs(
+                        DefaultLoadControl.DEFAULT_MIN_BUFFER_MS * bufferMultiplier,
+                        DefaultLoadControl.DEFAULT_MAX_BUFFER_MS * bufferMultiplier,
+                        DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS,
+                        DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS * bufferMultiplier
+                )
+                .setPrioritizeTimeOverSizeThresholds(true)
+                .build();
     }
 
     private static TrackSelector buildTrackSelector() {
@@ -108,13 +117,17 @@ public class ExoUtil {
         if (PlayerSetting.isPreferAAC()) builder.setPreferredAudioMimeType(MimeTypes.AUDIO_AAC);
         builder.setPreferredTextLanguage(Locale.getDefault().getISO3Language());
         builder.setTunnelingEnabled(PlayerSetting.isTunnel());
-        builder.setForceHighestSupportedBitrate(true);
+        builder.setForceHighestSupportedBitrate(false);
         trackSelector.setParameters(builder.build());
         return trackSelector;
     }
 
     private static RenderersFactory buildRenderersFactory(int renderMode) {
-        return new NextRenderersFactory(App.get()).setEnableDecoderFallback(true).setExtensionRendererMode(renderMode);
+        return new NextRenderersFactory(App.get())
+                .setEnableDecoderFallback(true)
+                .setExtensionRendererMode(renderMode)
+                .setAllowMixedMimeTypesForVideoTracks(true)
+                .setAllowMixedMimeTypesForAudioTracks(true);
     }
 
     private static MediaSource.Factory buildMediaSourceFactory() {
