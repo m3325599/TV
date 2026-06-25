@@ -123,11 +123,7 @@ public class ExoUtil {
     }
 
     private static RenderersFactory buildRenderersFactory(int renderMode) {
-        return new NextRenderersFactory(App.get())
-                .setEnableDecoderFallback(true)
-                .setExtensionRendererMode(renderMode)
-                .setAllowMixedMimeTypesForVideoTracks(true)
-                .setAllowMixedMimeTypesForAudioTracks(true);
+        return new NextRenderersFactory(App.get()).setEnableDecoderFallback(true).setExtensionRendererMode(renderMode);
     }
 
     private static MediaSource.Factory buildMediaSourceFactory() {
