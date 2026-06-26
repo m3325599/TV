@@ -49,6 +49,7 @@ import com.fongmi.android.tv.bean.Vod;
 import com.fongmi.android.tv.databinding.ActivityVideoBinding;
 import com.fongmi.android.tv.db.AppDatabase;
 import com.fongmi.android.tv.event.RefreshEvent;
+import com.fongmi.android.tv.download.DownloadManager;
 import com.fongmi.android.tv.impl.CustomTarget;
 import com.fongmi.android.tv.model.SiteViewModel;
 import com.fongmi.android.tv.player.PlayerHelper;
@@ -287,6 +288,7 @@ public class VideoActivity extends PlaybackActivity implements CustomKeyDownVod.
         mBinding.video.setOnClickListener(view -> onVideo());
         mBinding.change1.setOnClickListener(view -> onChange());
         mBinding.content.setOnClickListener(view -> onContent());
+        mBinding.download.setOnClickListener(view -> onDownload());
         mBinding.control.action.text.setOnClickListener(this::onTrack);
         mBinding.control.action.audio.setOnClickListener(this::onTrack);
         mBinding.control.action.video.setOnClickListener(this::onTrack);
@@ -656,6 +658,29 @@ public class VideoActivity extends PlaybackActivity implements CustomKeyDownVod.
 
     private void onChange() {
         checkSearch(true);
+    }
+
+    private void onDownload() {
+        Result result = mViewModel.getPlayer().getValue();
+        if (result == null || TextUtils.isEmpty(result.getUrl().getUrl())) {
+            Notify.show("请先选择视频源播放后再下载");
+            return;
+        }
+
+        String videoUrl = result.getUrl().getUrl();
+        String title = mHistory.getVodName();
+        String episode = getEpisode() != null ? getEpisode().getName() : "";
+
+        DownloadManager dm = DownloadManager.getInstance(this);
+        dm.setDownloadPath(DownloadSetting.getPath());
+
+        if (dm.isDownloading(videoUrl)) {
+            Notify.show("正在下载中...");
+            return;
+        }
+
+        dm.downloadVideo(videoUrl, title, episode);
+        Notify.show("开始下载: " + title + (TextUtils.isEmpty(episode) ? "" : "_" + episode));
     }
 
     private void onRepeat() {
