@@ -2,6 +2,7 @@ package com.fongmi.android.tv.openlist;
 
 import android.text.TextUtils;
 
+import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.utils.Task;
 import com.github.catvod.net.OkHttp;
 
@@ -77,7 +78,7 @@ public class AListApi {
                 int code = json.getInt("code");
                 if (code != 200) {
                     String msg = json.optString("message", "Unknown error");
-                    Task.post(() -> callback.onError(msg));
+                    App.post(() -> callback.onError(msg));
                     return;
                 }
 
@@ -99,11 +100,11 @@ public class AListApi {
                     files.add(file);
                 }
 
-                Task.post(() -> callback.onSuccess(files));
+                App.post(() -> callback.onSuccess(files));
 
             } catch (Exception e) {
                 e.printStackTrace();
-                Task.post(() -> callback.onError(e.getMessage()));
+                App.post(() -> callback.onError(e.getMessage()));
             }
         });
     }
@@ -139,7 +140,7 @@ public class AListApi {
                 int code = json.getInt("code");
                 if (code != 200) {
                     String msg = json.optString("message", "Unknown error");
-                    Task.post(() -> callback.onError(msg));
+                    App.post(() -> callback.onError(msg));
                     return;
                 }
 
@@ -159,11 +160,11 @@ public class AListApi {
                     }
                 }
 
-                Task.post(() -> callback.onSuccess(files));
+                App.post(() -> callback.onSuccess(files));
 
             } catch (Exception e) {
                 e.printStackTrace();
-                Task.post(() -> callback.onError(e.getMessage()));
+                App.post(() -> callback.onError(e.getMessage()));
             }
         });
     }
