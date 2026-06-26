@@ -2,7 +2,7 @@ package com.fongmi.android.tv.event;
 
 import org.greenrobot.eventbus.EventBus;
 
-public record ServerEvent(Type type, String text, String name) {
+public record ServerEvent(Type type, String text, String name, String path) {
 
     public static void search(String text) {
         EventBus.getDefault().post(new ServerEvent(Type.SEARCH, text));
@@ -17,14 +17,22 @@ public record ServerEvent(Type type, String text, String name) {
     }
 
     public static void setting(String text, String name) {
-        EventBus.getDefault().post(new ServerEvent(Type.SETTING, text, name));
+        EventBus.getDefault().post(new ServerEvent(Type.SETTING, text, name, ""));
+    }
+
+    public static void openlist(String url, String token, String path) {
+        EventBus.getDefault().post(new ServerEvent(Type.OPENLIST, url, token, path));
     }
 
     private ServerEvent(Type type, String text) {
-        this(type, text, "");
+        this(type, text, "", "");
+    }
+
+    private ServerEvent(Type type, String text, String name) {
+        this(type, text, name, "");
     }
 
     public enum Type {
-        SEARCH, PUSH, SETTING
+        SEARCH, PUSH, SETTING, OPENLIST
     }
 }

@@ -54,6 +54,7 @@ public class Action implements Process {
             case "sync" -> onSync(params);
             case "search" -> onSearch(params);
             case "setting" -> onSetting(params);
+            case "openlist" -> onOpenlist(params);
             case "refresh" -> onRefresh(params);
             case "control" -> onControl(params);
             case "danmaku" -> onDanmaku(params);
@@ -123,6 +124,14 @@ public class Action implements Process {
         PlaybackService service = Server.get().getService();
         if (service == null || TextUtils.isEmpty(text)) return;
         App.post(() -> service.player().sendDanmaku(text));
+    }
+
+    private void onOpenlist(Map<String, String> params) {
+        String url = params.get("url");
+        String token = params.get("token");
+        String path = params.get("path");
+        if (TextUtils.isEmpty(url)) return;
+        ServerEvent.openlist(url, token != null ? token : "", path != null ? path : "/");
     }
 
     private void onCast(Map<String, String> params) {

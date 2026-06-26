@@ -34,6 +34,7 @@ public class OpenListSetting {
 
     public static void putToken(String token) {
         Prefers.put(KEY_TOKEN, token);
+        ConfigEvent.common();
     }
 
     public static String getMountPath() {
@@ -42,6 +43,7 @@ public class OpenListSetting {
 
     public static void putMountPath(String path) {
         Prefers.put(KEY_MOUNT_PATH, path);
+        ConfigEvent.common();
     }
 
     public static AListApi createApi() {
