@@ -49,7 +49,6 @@ import com.fongmi.android.tv.bean.Vod;
 import com.fongmi.android.tv.databinding.ActivityVideoBinding;
 import com.fongmi.android.tv.db.AppDatabase;
 import com.fongmi.android.tv.event.RefreshEvent;
-import com.fongmi.android.tv.download.DownloadManager;
 import com.fongmi.android.tv.impl.CustomTarget;
 import com.fongmi.android.tv.model.SiteViewModel;
 import com.fongmi.android.tv.player.PlayerHelper;
@@ -662,17 +661,17 @@ public class VideoActivity extends PlaybackActivity implements CustomKeyDownVod.
 
     private void onDownload() {
         Result result = mViewModel.getPlayer().getValue();
-        if (result == null || TextUtils.isEmpty(result.getUrl().getUrl())) {
+        if (result == null || TextUtils.isEmpty(result.getUrl().v())) {
             Notify.show("请先选择视频源播放后再下载");
             return;
         }
 
-        String videoUrl = result.getUrl().getUrl();
+        String videoUrl = result.getUrl().v();
         String title = mHistory.getVodName();
         String episode = getEpisode() != null ? getEpisode().getName() : "";
 
-        DownloadManager dm = DownloadManager.getInstance(this);
-        dm.setDownloadPath(DownloadSetting.getPath());
+        com.fongmi.android.tv.download.DownloadManager dm = com.fongmi.android.tv.download.DownloadManager.getInstance(this);
+        dm.setDownloadPath(com.fongmi.android.tv.setting.DownloadSetting.getPath());
 
         if (dm.isDownloading(videoUrl)) {
             Notify.show("正在下载中...");
