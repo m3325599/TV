@@ -33,64 +33,26 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
-    <LinearLayout
-        android:id="@+id/input_container"
+    <com.fongmi.android.tv.ui.custom.CustomEditText
+        android:id="@+id/text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/bottom"
         android:layout_alignStart="@+id/info"
         android:layout_marginBottom="10dp"
-        android:layout_toEndOf="@+id/code"
-        android:orientation="vertical">
-
-        <com.fongmi.android.tv.ui.custom.CustomEditText
-            android:id="@+id/text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/openlist_server_hint"
-            android:imeOptions="actionNext"
-            android:importantForAutofill="no"
-            android:inputType="textUri"
-            android:nextFocusDown="@id/token"
-            android:singleLine="true"
-            android:textSize="18sp" />
-
-        <com.fongmi.android.tv.ui.custom.CustomEditText
-            android:id="@+id/token"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="@string/openlist_token_hint"
-            android:imeOptions="actionNext"
-            android:importantForAutofill="no"
-            android:inputType="text"
-            android:nextFocusDown="@id/path"
-            android:singleLine="true"
-            android:textSize="18sp" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/path_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/openlist_path_hint"
-            android:textColor="@color/white"
-            android:textSize="14sp" />
-
-        <Spinner
-            android:id="@+id/path"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:nextFocusDown="@id/positive" />
-
-    </LinearLayout>
+        android:hint="@string/dialog_config_hint"
+        android:imeOptions="actionDone"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:nextFocusDown="@id/positive"
+        android:singleLine="true"
+        android:textSize="18sp" />
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/input_container"
+        android:layout_alignStart="@+id/info"
         android:layout_alignBottom="@+id/code"
         android:orientation="horizontal">
 
