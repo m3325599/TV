@@ -53,7 +53,7 @@ public class OpenListAdapter extends RecyclerView.Adapter<OpenListAdapter.ViewHo
         return mItems.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
         private final ItemOpenlistBinding binding;
 

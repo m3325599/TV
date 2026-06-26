@@ -43,6 +43,7 @@ import com.fongmi.android.tv.event.ConfigEvent;
 import com.fongmi.android.tv.event.RefreshEvent;
 import com.fongmi.android.tv.event.ServerEvent;
 import com.fongmi.android.tv.impl.Callback;
+import com.fongmi.android.tv.model.SiteViewModel;
 import com.fongmi.android.tv.openlist.OpenListSetting;
 import com.fongmi.android.tv.player.Source;
 import com.fongmi.android.tv.server.Server;
