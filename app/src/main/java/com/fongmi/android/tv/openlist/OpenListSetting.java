@@ -1,5 +1,6 @@
 package com.fongmi.android.tv.openlist;
 
+import com.fongmi.android.tv.event.ConfigEvent;
 import com.github.catvod.utils.Prefers;
 
 public class OpenListSetting {
@@ -15,6 +16,7 @@ public class OpenListSetting {
 
     public static void putEnabled(boolean enabled) {
         Prefers.put(KEY_ENABLED, enabled);
+        ConfigEvent.common();
     }
 
     public static String getServerUrl() {
@@ -23,6 +25,7 @@ public class OpenListSetting {
 
     public static void putServerUrl(String url) {
         Prefers.put(KEY_SERVER_URL, url);
+        ConfigEvent.common();
     }
 
     public static String getToken() {

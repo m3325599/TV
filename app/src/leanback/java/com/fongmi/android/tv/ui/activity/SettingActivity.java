@@ -85,6 +85,9 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
         mBinding.wallUrl.setText(WallConfig.getDesc());
         mBinding.versionText.setText(BuildConfig.VERSION_NAME);
         mBinding.downloadPathText.setText(DownloadSetting.getPath());
+        mBinding.openlistServerText.setText(OpenListSetting.getServerUrl());
+        mBinding.openlistTokenText.setText(OpenListSetting.getToken());
+        mBinding.openlistPathText.setText(OpenListSetting.getMountPath());
         setCacheText();
         setOtherText();
     }
@@ -118,6 +121,9 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
         mBinding.restore.setOnClickListener(this::onRestore);
         mBinding.version.setOnClickListener(this::onVersion);
         mBinding.downloadPath.setOnClickListener(this::onDownloadPath);
+        mBinding.openlistServer.setOnClickListener(this::onOpenlistServer);
+        mBinding.openlistToken.setOnClickListener(this::onOpenlistToken);
+        mBinding.openlistPath.setOnClickListener(this::onOpenlistPath);
         mBinding.vod.setOnLongClickListener(this::onVodEdit);
         mBinding.vodHome.setOnClickListener(this::onVodHome);
         mBinding.live.setOnLongClickListener(this::onLiveEdit);
@@ -288,6 +294,41 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
                 if (!value.isEmpty()) {
                     DownloadSetting.putPath(value);
                     mBinding.downloadPathText.setText(value);
+                    Notify.show(R.string.copied);
+                }
+            }).show(this);
+    }
+
+    private void onOpenlistServer(View view) {
+        InputDialog.create()
+            .title(getString(R.string.setting_openlist_server))
+            .value(OpenListSetting.getServerUrl())
+            .listener(value -> {
+                OpenListSetting.putServerUrl(value);
+                mBinding.openlistServerText.setText(value);
+                Notify.show(R.string.copied);
+            }).show(this);
+    }
+
+    private void onOpenlistToken(View view) {
+        InputDialog.create()
+            .title(getString(R.string.setting_openlist_token))
+            .value(OpenListSetting.getToken())
+            .listener(value -> {
+                OpenListSetting.putToken(value);
+                mBinding.openlistTokenText.setText(value);
+                Notify.show(R.string.copied);
+            }).show(this);
+    }
+
+    private void onOpenlistPath(View view) {
+        InputDialog.create()
+            .title(getString(R.string.setting_openlist_path))
+            .value(OpenListSetting.getMountPath())
+            .listener(value -> {
+                if (!value.isEmpty()) {
+                    OpenListSetting.putMountPath(value);
+                    mBinding.openlistPathText.setText(value);
                     Notify.show(R.string.copied);
                 }
             }).show(this);

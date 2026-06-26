@@ -9,6 +9,11 @@
     <string name="home_setting">设置</string>
     <string name="home_history">最近观看</string>
     <string name="home_recommend">更新推荐</string>
+    <string name="openlist">网盘</string>
+    <string name="setting_openlist_server">网盘地址</string>
+    <string name="setting_openlist_token">网盘令牌</string>
+    <string name="setting_openlist_path">网盘挂载路径</string>
+    <string name="setting_download_path">下载路径</string>
 
     <!-- Collect -->
     <string name="collect_result">“<xliff:g name="name">%s</xliff:g>”的搜索结果</string>

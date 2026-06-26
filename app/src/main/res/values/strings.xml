@@ -48,6 +48,9 @@
     <string name="download_start">Start download</string>
     <string name="setting_download_path">Download Path</string>
     <string name="openlist">OpenList</string>
+    <string name="setting_openlist_server">OpenList Server</string>
+    <string name="setting_openlist_token">OpenList Token</string>
+    <string name="setting_openlist_path">OpenList Mount Path</string>
     <string name="play_invert">Invert</string>
     <string name="play_across">Across</string>
     <string name="play_reverse">Reverse</string>
