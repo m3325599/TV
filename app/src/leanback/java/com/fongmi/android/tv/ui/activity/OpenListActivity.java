@@ -5,17 +5,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.leanback.widget.VerticalGridView;
 import androidx.viewbinding.ViewBinding;
 
-import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.databinding.ActivityOpenlistBinding;
 import com.fongmi.android.tv.openlist.AListApi;
 import com.fongmi.android.tv.openlist.OpenListSetting;
 import com.fongmi.android.tv.ui.adapter.OpenListAdapter;
 import com.fongmi.android.tv.ui.base.BaseActivity;
 import com.fongmi.android.tv.utils.Notify;
+import com.fongmi.android.tv.utils.ResUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,37 +39,39 @@ public class OpenListActivity extends BaseActivity implements OpenListAdapter.On
     @Override
     protected void initView(Bundle savedInstanceState) {
         mHistory = new ArrayList<>();
-        mAdapter = new OpenListAdapter(this);
-        mBinding.recycler.setLayoutManager(new LinearLayoutManager(this));
-        mBinding.recycler.setAdapter(mAdapter);
+        setRecyclerView();
         mApi = OpenListSetting.createApi();
         currentPath = OpenListSetting.getMountPath();
         loadFiles(currentPath);
     }
 
+    private void setRecyclerView() {
+        mBinding.recycler.setHasFixedSize(true);
+        mBinding.recycler.setVerticalSpacing(ResUtil.dp2px(16));
+        mBinding.recycler.setAdapter(mAdapter = new OpenListAdapter(this));
+    }
+
     @Override
     protected void initEvent() {
-        mBinding.back.setOnClickListener(view -> onBackPressed());
+        mBinding.back.setOnClickListener(view -> onBackInvoked());
     }
 
     private void loadFiles(String path) {
-        mBinding.progress.setVisibility(View.VISIBLE);
-        mBinding.recycler.setVisibility(View.GONE);
+        mBinding.progressLayout.showProgress();
         mBinding.path.setText(path);
         currentPath = path;
 
         mApi.listFiles(path, new AListApi.ListCallback() {
             @Override
             public void onSuccess(List<AListApi.AListFile> files) {
-                mBinding.progress.setVisibility(View.GONE);
-                mBinding.recycler.setVisibility(View.VISIBLE);
                 mAdapter.addAll(files);
-                mBinding.recycler.requestFocus();
+                mBinding.progressLayout.showContent(true, mAdapter.getItemCount());
+                mBinding.recycler.setSelectedPosition(0);
             }
 
             @Override
             public void onError(String error) {
-                mBinding.progress.setVisibility(View.GONE);
+                mBinding.progressLayout.showContent(false, 0);
                 Notify.show("Error: " + error);
             }
         });
@@ -79,8 +80,9 @@ public class OpenListActivity extends BaseActivity implements OpenListAdapter.On
     @Override
     public void onItemClick(AListApi.AListFile item) {
         if (item.isFolder()) {
-            mHistory.add(new AListApi.AListFile());
-            mHistory.get(mHistory.size() - 1).setPath(currentPath);
+            AListApi.AListFile history = new AListApi.AListFile();
+            history.setPath(currentPath);
+            mHistory.add(history);
             loadFiles(item.getPath());
         } else if (item.isMedia()) {
             playFile(item);
@@ -96,9 +98,9 @@ public class OpenListActivity extends BaseActivity implements OpenListAdapter.On
     }
 
     @Override
-    public void onBackPressed() {
+    protected void onBackInvoked() {
         if (mHistory.isEmpty()) {
-            super.onBackPressed();
+            super.onBackInvoked();
         } else {
             String path = mHistory.remove(mHistory.size() - 1).getPath();
             loadFiles(path);
