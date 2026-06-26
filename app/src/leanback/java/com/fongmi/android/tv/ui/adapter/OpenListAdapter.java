@@ -9,12 +9,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.databinding.ItemOpenlistBinding;
 import com.fongmi.android.tv.openlist.AListApi;
-import com.fongmi.android.tv.ui.custom.CustomViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OpenListAdapter extends RecyclerView.Adapter<CustomViewHolder<ItemOpenlistBinding>> {
+public class OpenListAdapter extends RecyclerView.Adapter<OpenListAdapter.ViewHolder> {
 
     private final List<AListApi.AListFile> mItems = new ArrayList<>();
     private final OnClickListener mListener;
@@ -35,17 +34,16 @@ public class OpenListAdapter extends RecyclerView.Adapter<CustomViewHolder<ItemO
 
     @NonNull
     @Override
-    public CustomViewHolder<ItemOpenlistBinding> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ItemOpenlistBinding binding = ItemOpenlistBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
-        return new CustomViewHolder<>(binding);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ViewHolder(ItemOpenlistBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CustomViewHolder<ItemOpenlistBinding> holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         AListApi.AListFile item = mItems.get(position);
         holder.binding.name.setText(item.getName());
         holder.binding.icon.setImageResource(item.isFolder() ? R.drawable.ic_folder : R.drawable.ic_file);
-        holder.itemView.setOnClickListener(view -> {
+        holder.binding.getRoot().setOnClickListener(view -> {
             if (mListener != null) mListener.onItemClick(item);
         });
     }
@@ -53,5 +51,15 @@ public class OpenListAdapter extends RecyclerView.Adapter<CustomViewHolder<ItemO
     @Override
     public int getItemCount() {
         return mItems.size();
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+
+        private final ItemOpenlistBinding binding;
+
+        ViewHolder(@NonNull ItemOpenlistBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
     }
 }

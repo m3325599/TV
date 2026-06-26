@@ -4,8 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 
 import com.fongmi.android.tv.R;
@@ -15,7 +16,6 @@ import com.fongmi.android.tv.openlist.OpenListSetting;
 import com.fongmi.android.tv.ui.adapter.OpenListAdapter;
 import com.fongmi.android.tv.ui.base.BaseActivity;
 import com.fongmi.android.tv.utils.Notify;
-import com.fongmi.android.tv.utils.ResUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +41,7 @@ public class OpenListActivity extends BaseActivity implements OpenListAdapter.On
     protected void initView(Bundle savedInstanceState) {
         mHistory = new ArrayList<>();
         mAdapter = new OpenListAdapter(this);
-        mBinding.recycler.setHorizontalSpacing(ResUtil.dp2px(8));
-        mBinding.recycler.setRowHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+        mBinding.recycler.setLayoutManager(new LinearLayoutManager(this));
         mBinding.recycler.setAdapter(mAdapter);
         mApi = OpenListSetting.createApi();
         currentPath = OpenListSetting.getMountPath();

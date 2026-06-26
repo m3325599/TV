@@ -8,10 +8,12 @@ import com.github.catvod.net.OkHttp;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.MediaType;
 import okhttp3.Response;
 
 public class AListApi {
@@ -55,18 +57,20 @@ public class AListApi {
                 body.put("per_page", 100);
                 body.put("refresh", false);
 
-                okhttp3.Request.Builder builder = new okhttp3.Request.Builder()
+                RequestBody requestBody = RequestBody.create(
+                        MediaType.parse("application/json"),
+                        body.toString()
+                );
+
+                Request.Builder builder = new Request.Builder()
                         .url(url)
-                        .post(okhttp3.RequestBody.create(
-                                okhttp3.MediaType.parse("application/json"),
-                                body.toString()
-                        ));
+                        .post(requestBody);
 
                 if (!TextUtils.isEmpty(token)) {
                     builder.addHeader("Authorization", token);
                 }
 
-                Response response = OkHttp.newCall(builder.build()).execute();
+                Response response = OkHttp.client().newCall(builder.build()).execute();
                 String result = response.body().string();
 
                 JSONObject json = new JSONObject(result);
@@ -115,18 +119,20 @@ public class AListApi {
                 body.put("per_page", 100);
                 body.put("refresh", false);
 
-                okhttp3.Request.Builder builder = new okhttp3.Request.Builder()
+                RequestBody requestBody = RequestBody.create(
+                        MediaType.parse("application/json"),
+                        body.toString()
+                );
+
+                Request.Builder builder = new Request.Builder()
                         .url(url)
-                        .post(okhttp3.RequestBody.create(
-                                okhttp3.MediaType.parse("application/json"),
-                                body.toString()
-                        ));
+                        .post(requestBody);
 
                 if (!TextUtils.isEmpty(token)) {
                     builder.addHeader("Authorization", token);
                 }
 
-                Response response = OkHttp.newCall(builder.build()).execute();
+                Response response = OkHttp.client().newCall(builder.build()).execute();
                 String result = response.body().string();
 
                 JSONObject json = new JSONObject(result);
