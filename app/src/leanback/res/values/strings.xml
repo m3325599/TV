@@ -17,4 +17,10 @@
     <string name="push_clip">Push clipboard content</string>
     <string name="push_info">Scan QR Code or enter the URL in browser\n<xliff:g name="name">%s</xliff:g></string>
 
+    <!-- OpenList -->
+    <string name="openlist">OpenList</string>
+    <string name="setting_openlist_server">OpenList Server</string>
+    <string name="setting_openlist_token">OpenList Token</string>
+    <string name="setting_openlist_path">OpenList Mount Path</string>
+
 </resources>
