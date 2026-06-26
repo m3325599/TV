@@ -34,6 +34,7 @@ import com.fongmi.android.tv.ui.dialog.DohDialog;
 import com.fongmi.android.tv.ui.dialog.HistoryDialog;
 import com.fongmi.android.tv.ui.dialog.InputDialog;
 import com.fongmi.android.tv.ui.dialog.LiveDialog;
+import com.fongmi.android.tv.ui.dialog.OpenListConfigDialog;
 import com.fongmi.android.tv.ui.dialog.RestoreDialog;
 import com.fongmi.android.tv.ui.dialog.SiteDialog;
 import com.fongmi.android.tv.utils.FileUtil;
@@ -300,14 +301,7 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
     }
 
     private void onOpenlistServer(View view) {
-        InputDialog.create()
-            .title(getString(R.string.setting_openlist_server))
-            .value(OpenListSetting.getServerUrl())
-            .listener(value -> {
-                OpenListSetting.putServerUrl(value);
-                mBinding.openlistServerText.setText(value);
-                Notify.show(R.string.copied);
-            }).show(this);
+        OpenListConfigDialog.create().show(this);
     }
 
     private void onOpenlistToken(View view) {
