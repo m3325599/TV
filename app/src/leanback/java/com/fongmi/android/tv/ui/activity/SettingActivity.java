@@ -26,10 +26,13 @@ import com.fongmi.android.tv.impl.LiveListener;
 import com.fongmi.android.tv.impl.SiteListener;
 import com.fongmi.android.tv.setting.PlayerSetting;
 import com.fongmi.android.tv.setting.Setting;
+import com.fongmi.android.tv.openlist.OpenListSetting;
+import com.fongmi.android.tv.setting.DownloadSetting;
 import com.fongmi.android.tv.ui.base.BaseActivity;
 import com.fongmi.android.tv.ui.dialog.ConfigDialog;
 import com.fongmi.android.tv.ui.dialog.DohDialog;
 import com.fongmi.android.tv.ui.dialog.HistoryDialog;
+import com.fongmi.android.tv.ui.dialog.InputDialog;
 import com.fongmi.android.tv.ui.dialog.LiveDialog;
 import com.fongmi.android.tv.ui.dialog.RestoreDialog;
 import com.fongmi.android.tv.ui.dialog.SiteDialog;
@@ -81,6 +84,7 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
         mBinding.liveUrl.setText(LiveConfig.getDesc());
         mBinding.wallUrl.setText(WallConfig.getDesc());
         mBinding.versionText.setText(BuildConfig.VERSION_NAME);
+        mBinding.downloadPathText.setText(DownloadSetting.getPath());
         setCacheText();
         setOtherText();
     }
@@ -113,6 +117,7 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
         mBinding.danmaku.setOnClickListener(this::onDanmaku);
         mBinding.restore.setOnClickListener(this::onRestore);
         mBinding.version.setOnClickListener(this::onVersion);
+        mBinding.downloadPath.setOnClickListener(this::onDownloadPath);
         mBinding.vod.setOnLongClickListener(this::onVodEdit);
         mBinding.vodHome.setOnClickListener(this::onVodHome);
         mBinding.live.setOnLongClickListener(this::onLiveEdit);
@@ -273,6 +278,19 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
         OkHttp.dns().setDoh(doh);
         Setting.putDoh(doh.toString());
         mBinding.dohText.setText(doh.getName());
+    }
+
+    private void onDownloadPath(View view) {
+        InputDialog.create()
+            .title(getString(R.string.setting_download_path))
+            .value(DownloadSetting.getPath())
+            .listener(value -> {
+                if (!value.isEmpty()) {
+                    DownloadSetting.putPath(value);
+                    mBinding.downloadPathText.setText(value);
+                    Notify.show(R.string.copied);
+                }
+            }).show(this);
     }
 
     private void onCache(View view) {
