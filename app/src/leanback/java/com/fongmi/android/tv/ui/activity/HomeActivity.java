@@ -360,6 +360,8 @@ public class HomeActivity extends BaseActivity implements CustomTitleView.Listen
             case PUSH:
                 VideoActivity.push(this, event.text());
                 break;
+            case SETTING:
+                break;
             case OPENLIST:
                 OpenListSetting.putServerUrl(event.text());
                 OpenListSetting.putToken(event.name());
