@@ -2,10 +2,15 @@ package com.fongmi.android.tv.ui.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.viewbinding.ViewBinding;
+
+import com.fongmi.android.tv.utils.FileChooser;
 
 import com.fongmi.android.tv.BuildConfig;
 import com.fongmi.android.tv.R;
@@ -54,6 +59,20 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
 
     private ActivitySettingBinding mBinding;
     private String[] size;
+
+    private final ActivityResultLauncher<Intent> downloadDirLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),
+        result -> {
+            if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null && result.getData().getData() != null) {
+                String path = FileChooser.getPathFromUri(result.getData().getData());
+                if (path != null && !path.isEmpty()) {
+                    DownloadSetting.putPath(path);
+                    mBinding.downloadPathText.setText(path);
+                    Notify.show(R.string.copied);
+                }
+            }
+        }
+    );
 
     public static void start(Activity activity) {
         activity.startActivity(new Intent(activity, SettingActivity.class));
@@ -288,16 +307,11 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
     }
 
     private void onDownloadPath(View view) {
-        InputDialog.create()
-            .title(getString(R.string.setting_download_path))
-            .value(DownloadSetting.getPath())
-            .listener(value -> {
-                if (!value.isEmpty()) {
-                    DownloadSetting.putPath(value);
-                    mBinding.downloadPathText.setText(value);
-                    Notify.show(R.string.copied);
-                }
-            }).show(this);
+        PermissionUtil.requestFile(this, allGranted -> {
+            Intent intent = new Intent(this, FileActivity.class);
+            intent.putExtra(FileActivity.EXTRA_PICK_DIR, true);
+            downloadDirLauncher.launch(intent);
+        });
     }
 
     private void onOpenlistServer(View view) {

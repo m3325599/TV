@@ -47,6 +47,7 @@
     <string name="download">Download</string>
     <string name="download_start">Start download</string>
     <string name="setting_download_path">Download Path</string>
+    <string name="select_current_dir">Select Current Directory</string>
     <string name="openlist">OpenList</string>
     <string name="setting_openlist_server">OpenList Server</string>
     <string name="setting_openlist_token">OpenList Token</string>

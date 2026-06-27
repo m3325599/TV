@@ -14,6 +14,7 @@
     <string name="setting_openlist_token">网盘令牌</string>
     <string name="setting_openlist_path">网盘挂载路径</string>
     <string name="setting_download_path">下载路径</string>
+    <string name="select_current_dir">选择此目录</string>
 
     <!-- Collect -->
     <string name="collect_result">“<xliff:g name="name">%s</xliff:g>”的搜索结果</string>

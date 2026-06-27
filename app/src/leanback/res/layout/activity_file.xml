@@ -1,15 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.fongmi.android.tv.ui.custom.ProgressLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/progressLayout"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <androidx.leanback.widget.VerticalGridView
-        android:id="@+id/recycler"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/selectDirBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_margin="16dp"
+        android:text="@string/select_current_dir"
+        android:visibility="gone" />
+
+    <com.fongmi.android.tv.ui.custom.ProgressLayout
+        android:id="@+id/progressLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:padding="24dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-</com.fongmi.android.tv.ui.custom.ProgressLayout>
+        <androidx.leanback.widget.VerticalGridView
+            android:id="@+id/recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:padding="24dp" />
+
+    </com.fongmi.android.tv.ui.custom.ProgressLayout>
+
+</LinearLayout>
