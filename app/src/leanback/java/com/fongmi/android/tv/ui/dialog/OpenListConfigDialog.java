@@ -1,6 +1,5 @@
 package com.fongmi.android.tv.ui.dialog;
 
-import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 
@@ -46,8 +45,8 @@ public class OpenListConfigDialog extends BaseAlertDialog {
 
     @Override
     protected void initView() {
-        binding.text.setText(OpenListSetting.getServerUrl());
-        binding.text.setSelection(TextUtils.isEmpty(OpenListSetting.getServerUrl()) ? 0 : OpenListSetting.getServerUrl().length());
+        binding.url.setText(OpenListSetting.getServerUrl());
+        binding.token.setText(OpenListSetting.getToken());
         binding.code.setImageBitmap(QRCode.getBitmap(Server.get().getAddress(3), 200, 0));
         binding.info.setText(ResUtil.getString(R.string.push_info, Server.get().getAddress()).replace("\uff0c", "\n"));
     }
@@ -56,13 +55,13 @@ public class OpenListConfigDialog extends BaseAlertDialog {
     protected void initEvent() {
         binding.positive.setOnClickListener(this::onPositive);
         binding.negative.setOnClickListener(this::onNegative);
-        binding.text.addTextChangedListener(new CustomTextListener() {
+        binding.url.addTextChangedListener(new CustomTextListener() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 detect(s.toString());
             }
         });
-        binding.text.setOnEditorActionListener((textView, actionId, event) -> {
+        binding.token.setOnEditorActionListener((textView, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) binding.positive.performClick();
             return true;
         });
@@ -70,17 +69,19 @@ public class OpenListConfigDialog extends BaseAlertDialog {
 
     private void detect(String s) {
         if ("h".equalsIgnoreCase(s)) {
-            binding.text.append("ttp://");
+            binding.url.append("ttp://");
         } else if ("f".equalsIgnoreCase(s)) {
-            binding.text.append("ile://");
+            binding.url.append("ile://");
         }
     }
 
     private void onPositive(View view) {
-        String text = binding.text.getText().toString().trim();
-        if (!text.isEmpty()) {
-            OpenListSetting.putServerUrl(text);
+        String url = binding.url.getText().toString().trim();
+        String token = binding.token.getText().toString().trim();
+        if (!url.isEmpty()) {
+            OpenListSetting.putServerUrl(url);
         }
+        OpenListSetting.putToken(token);
         dismiss();
     }
 
@@ -91,8 +92,11 @@ public class OpenListConfigDialog extends BaseAlertDialog {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onServerEvent(ServerEvent event) {
         if (event.type() == ServerEvent.Type.SETTING || event.type() == ServerEvent.Type.OPENLIST) {
-            binding.text.setText(event.text());
-            binding.text.setSelection(binding.text.getText().length());
+            binding.url.setText(event.text());
+            binding.url.setSelection(binding.url.getText().length());
+            if (event.name() != null) {
+                binding.token.setText(event.name());
+            }
         }
     }
 

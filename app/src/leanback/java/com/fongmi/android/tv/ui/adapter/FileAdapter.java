@@ -17,10 +17,15 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
     private final OnClickListener mListener;
     private final List<File> mItems;
+    private boolean mPickDirMode;
 
     public FileAdapter(OnClickListener listener) {
         mListener = listener;
         mItems = new ArrayList<>();
+    }
+
+    public void setPickDirMode(boolean pickDirMode) {
+        mPickDirMode = pickDirMode;
     }
 
     public void addAll(List<File> items) {
@@ -31,7 +36,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return mItems.size();
+        return mItems.size() + (mPickDirMode ? 1 : 0);
     }
 
     @NonNull
@@ -42,15 +47,24 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        File file = mItems.get(position);
-        holder.binding.name.setText(file.getName());
-        holder.binding.image.setImageResource(file.isDirectory() ? R.drawable.ic_folder : R.drawable.ic_file);
-        holder.binding.getRoot().setOnClickListener(v -> mListener.onItemClick(file));
+        if (mPickDirMode && position == 0) {
+            holder.binding.name.setText(R.string.select_current_dir);
+            holder.binding.image.setImageResource(R.drawable.ic_folder);
+            holder.binding.getRoot().setOnClickListener(v -> mListener.onSelectCurrentDir());
+        } else {
+            int itemPos = mPickDirMode ? position - 1 : position;
+            File file = mItems.get(itemPos);
+            holder.binding.name.setText(file.getName());
+            holder.binding.image.setImageResource(file.isDirectory() ? R.drawable.ic_folder : R.drawable.ic_file);
+            holder.binding.getRoot().setOnClickListener(v -> mListener.onItemClick(file));
+        }
     }
 
     public interface OnClickListener {
 
         void onItemClick(File file);
+
+        void onSelectCurrentDir();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
