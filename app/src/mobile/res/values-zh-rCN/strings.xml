@@ -27,20 +27,20 @@
     <string name="detail_search">快搜“<xliff:g name="name">%s</xliff:g>”</string>
 
     <!-- Device -->
-    <string name="device_select">选择装置</string>
-    <string name="device_offline">装置已离线</string>
+    <string name="device_select">选择设备</string>
+    <string name="device_offline">设备已离线</string>
     <string name="device_scan">请扫描影视 QRCode 进行绑定</string>
 
     <!-- Control -->
     <string name="control_speed">倍速</string>
     <string name="control_scale">缩放</string>
     <string name="control_track">轨道</string>
-    <string name="control_other">其它</string>
+    <string name="control_other">其他</string>
 
     <!-- Dialog -->
-    <string name="dialog_delete_record">删除全部纪录？</string>
-    <string name="dialog_delete_keep">收藏纪录将会全部删除。</string>
-    <string name="dialog_delete_history">观看纪录将会全部删除。</string>
+    <string name="dialog_delete_record">删除全部记录？</string>
+    <string name="dialog_delete_keep">收藏记录将会全部删除。</string>
+    <string name="dialog_delete_history">观看记录将会全部删除。</string>
 
     <!-- Timer -->
     <string name="timer_5">5 分钟</string>
@@ -51,7 +51,7 @@
     <string name="timer_cancel">取消定时器</string>
 
     <!-- Hint -->
-    <string name="shortcut"> 已于主萤幕新增捷径。</string>
+    <string name="shortcut"> 已于主屏幕新增捷径。</string>
 
     <string-array name="select_background">
         <item>关闭</item>

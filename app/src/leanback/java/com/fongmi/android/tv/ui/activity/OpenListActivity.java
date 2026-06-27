@@ -8,6 +8,7 @@ import android.view.View;
 import androidx.leanback.widget.VerticalGridView;
 import androidx.viewbinding.ViewBinding;
 
+import com.fongmi.android.tv.api.SiteApi;
 import com.fongmi.android.tv.databinding.ActivityOpenlistBinding;
 import com.fongmi.android.tv.openlist.AListApi;
 import com.fongmi.android.tv.openlist.OpenListSetting;
@@ -94,7 +95,7 @@ public class OpenListActivity extends BaseActivity implements OpenListAdapter.On
     private void playFile(AListApi.AListFile file) {
         String url = mApi.getFileUrl(file.getPath());
         String name = file.getName();
-        VideoActivity.start(this, "openlist", url, name);
+        VideoActivity.start(this, SiteApi.PUSH, url, name);
     }
 
     @Override
