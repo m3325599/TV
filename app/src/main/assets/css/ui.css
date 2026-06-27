@@ -462,3 +462,27 @@ html, body {
 
 @keyframes md-spin { to { transform: rotate(360deg); } }
 
+/* ══ Config Section ══ */
+.config-section {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--md-surface-container-high);
+    border-radius: 12px;
+}
+
+.config-section-title {
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 500;
+    color: var(--md-primary);
+    margin-bottom: 12px;
+}
+
+.config-section .md-field {
+    margin-bottom: 8px;
+}
+
+.config-section:last-child {
+    margin-bottom: 0;
+}
+

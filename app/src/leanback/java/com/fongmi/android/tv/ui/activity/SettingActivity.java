@@ -2,15 +2,10 @@ package com.fongmi.android.tv.ui.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.viewbinding.ViewBinding;
-
-import com.fongmi.android.tv.utils.FileChooser;
 
 import com.fongmi.android.tv.BuildConfig;
 import com.fongmi.android.tv.R;
@@ -32,7 +27,6 @@ import com.fongmi.android.tv.impl.SiteListener;
 import com.fongmi.android.tv.setting.PlayerSetting;
 import com.fongmi.android.tv.setting.Setting;
 import com.fongmi.android.tv.openlist.OpenListSetting;
-import com.fongmi.android.tv.setting.DownloadSetting;
 import com.fongmi.android.tv.ui.base.BaseActivity;
 import com.fongmi.android.tv.ui.dialog.ConfigDialog;
 import com.fongmi.android.tv.ui.dialog.DohDialog;
@@ -59,20 +53,6 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
 
     private ActivitySettingBinding mBinding;
     private String[] size;
-
-    private final ActivityResultLauncher<Intent> downloadDirLauncher = registerForActivityResult(
-        new ActivityResultContracts.StartActivityForResult(),
-        result -> {
-            if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null && result.getData().getData() != null) {
-                String path = FileChooser.getPathFromUri(result.getData().getData());
-                if (path != null && !path.isEmpty()) {
-                    DownloadSetting.putPath(path);
-                    mBinding.downloadPathText.setText(path);
-                    Notify.show(R.string.copied);
-                }
-            }
-        }
-    );
 
     public static void start(Activity activity) {
         activity.startActivity(new Intent(activity, SettingActivity.class));
@@ -104,7 +84,6 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
         mBinding.liveUrl.setText(LiveConfig.getDesc());
         mBinding.wallUrl.setText(WallConfig.getDesc());
         mBinding.versionText.setText(BuildConfig.VERSION_NAME);
-        mBinding.downloadPathText.setText(DownloadSetting.getPath());
         mBinding.openlistServerText.setText(OpenListSetting.getServerUrl());
         mBinding.openlistTokenText.setText(OpenListSetting.getToken());
         setCacheText();
@@ -146,7 +125,6 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
         mBinding.danmaku.setOnClickListener(this::onDanmaku);
         mBinding.restore.setOnClickListener(this::onRestore);
         mBinding.version.setOnClickListener(this::onVersion);
-        mBinding.downloadPath.setOnClickListener(this::onDownloadPath);
         mBinding.openlistServer.setOnClickListener(this::onOpenlistServer);
         mBinding.openlistToken.setOnClickListener(this::onOpenlistServer);
         mBinding.vod.setOnLongClickListener(this::onVodEdit);
@@ -309,14 +287,6 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
         OkHttp.dns().setDoh(doh);
         Setting.putDoh(doh.toString());
         mBinding.dohText.setText(doh.getName());
-    }
-
-    private void onDownloadPath(View view) {
-        PermissionUtil.requestFile(this, allGranted -> {
-            Intent intent = new Intent(this, FileActivity.class);
-            intent.putExtra(FileActivity.EXTRA_PICK_DIR, true);
-            downloadDirLauncher.launch(intent);
-        });
     }
 
     private void onOpenlistServer(View view) {

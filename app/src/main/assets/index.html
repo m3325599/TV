@@ -59,15 +59,43 @@
             <!-- 設定 -->
             <div id="panel4" class="tab-panel">
                 <div class="panel-content">
-                    <div class="field-row">
-                        <div class="md-field short">
-                            <input id="setting_name" class="md-input" type="text" placeholder="名稱" />
+                    <!-- 点播源配置 -->
+                    <div class="config-section">
+                        <div class="config-section-title">点播源配置</div>
+                        <div class="field-row">
+                            <div class="md-field short">
+                                <input id="vod_name" class="md-input" type="text" placeholder="名称" />
+                            </div>
+                            <div class="md-field">
+                                <input id="vod_url" class="md-input" type="text" placeholder="点播源地址" />
+                            </div>
+                        </div>
+                        <button onclick="setVod()" class="md-btn md-btn-filled md-btn-full">设置点播源</button>
+                    </div>
+                    <!-- 直播源配置 -->
+                    <div class="config-section">
+                        <div class="config-section-title">直播源配置</div>
+                        <div class="field-row">
+                            <div class="md-field short">
+                                <input id="live_name" class="md-input" type="text" placeholder="名称" />
+                            </div>
+                            <div class="md-field">
+                                <input id="live_url" class="md-input" type="text" placeholder="直播源地址" />
+                            </div>
+                        </div>
+                        <button onclick="setLive()" class="md-btn md-btn-filled md-btn-full">设置直播源</button>
+                    </div>
+                    <!-- OpenList配置 -->
+                    <div class="config-section">
+                        <div class="config-section-title">网盘配置 (AList/OpenList)</div>
+                        <div class="md-field">
+                            <input id="openlist_url" class="md-input" type="text" placeholder="网盘服务器地址" />
                         </div>
                         <div class="md-field">
-                            <input id="setting_text" class="md-input" type="text" placeholder="配置" />
+                            <input id="openlist_token" class="md-input" type="text" placeholder="Token (可选)" />
                         </div>
+                        <button onclick="setOpenlist()" class="md-btn md-btn-filled md-btn-full">设置网盘</button>
                     </div>
-                    <button onclick="setting()" class="md-btn md-btn-filled md-btn-full">確定</button>
                 </div>
             </div>
             <!-- 本地 -->

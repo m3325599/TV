@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.api.config.VodConfig;
+import com.fongmi.android.tv.api.config.LiveConfig;
 import com.fongmi.android.tv.bean.Config;
 import com.fongmi.android.tv.bean.Device;
 import com.fongmi.android.tv.bean.History;
@@ -84,8 +85,26 @@ public class Action implements Process {
     private void onSetting(Map<String, String> params) {
         String text = params.get("text");
         String name = params.get("name");
+        String type = params.get("type");
         if (TextUtils.isEmpty(text)) return;
-        ServerEvent.setting(text, name);
+        if ("live".equals(type)) {
+            // 设置直播源
+            Config config = Config.find(Config.objectFrom(text), 1);
+            if (!TextUtils.isEmpty(name)) config.setName(name);
+            LiveConfig.load(config, new Callback() {
+                @Override
+                public void success() {
+                    Notify.show("直播源已设置");
+                }
+                @Override
+                public void error(String msg) {
+                    Notify.show(msg);
+                }
+            });
+        } else {
+            // 设置点播源
+            ServerEvent.setting(text, name);
+        }
     }
 
     private void onRefresh(Map<String, String> params) {

@@ -23,6 +23,31 @@ function setting() {
     doAction('setting', { text: $('#setting_text').val(), name: $('#setting_name').val() });
 }
 
+function setVod() {
+    const url = $('#vod_url').val().trim();
+    const name = $('#vod_name').val().trim();
+    if (!url) { warnToast('请输入点播源地址'); return; }
+    doAction('setting', { text: url, name: name });
+    warnToast('点播源已设置');
+}
+
+function setLive() {
+    const url = $('#live_url').val().trim();
+    const name = $('#live_name').val().trim();
+    if (!url) { warnToast('请输入直播源地址'); return; }
+    // 直播源需要特殊处理，使用 setting 但 type=1
+    doAction('setting', { text: url, name: name, type: 'live' });
+    warnToast('直播源已设置');
+}
+
+function setOpenlist() {
+    const url = $('#openlist_url').val().trim();
+    const token = $('#openlist_token').val().trim();
+    if (!url) { warnToast('请输入网盘服务器地址'); return; }
+    doAction('openlist', { url: url, token: token });
+    warnToast('网盘配置已设置');
+}
+
 function sendDanmaku() {
     const text = $('#danmaku_text').val().trim();
     if (!text) return;
