@@ -23,8 +23,8 @@ public class AListApi {
     private String token;
 
     public AListApi(String serverUrl, String token) {
-        this.serverUrl = serverUrl;
         this.token = token;
+        setServerUrl(serverUrl);
     }
 
     public void setServerUrl(String url) {
@@ -113,7 +113,7 @@ public class AListApi {
                         .post(requestBody);
 
                 if (!TextUtils.isEmpty(token)) {
-                    builder.addHeader("Authorization", "Bearer " + token);
+                    builder.addHeader("Authorization", token);
                 }
 
                 Response response = OkHttp.client().newCall(builder.build()).execute();
@@ -175,7 +175,7 @@ public class AListApi {
                         .post(requestBody);
 
                 if (!TextUtils.isEmpty(token)) {
-                    builder.addHeader("Authorization", "Bearer " + token);
+                    builder.addHeader("Authorization", token);
                 }
 
                 Response response = OkHttp.client().newCall(builder.build()).execute();
