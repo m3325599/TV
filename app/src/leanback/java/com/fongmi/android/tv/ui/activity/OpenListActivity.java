@@ -14,6 +14,7 @@ import com.fongmi.android.tv.openlist.AListApi;
 import com.fongmi.android.tv.openlist.OpenListSetting;
 import com.fongmi.android.tv.ui.adapter.OpenListAdapter;
 import com.fongmi.android.tv.ui.base.BaseActivity;
+import com.fongmi.android.tv.ui.dialog.ImageViewerDialog;
 import com.fongmi.android.tv.utils.Notify;
 import com.fongmi.android.tv.utils.ResUtil;
 
@@ -85,11 +86,18 @@ public class OpenListActivity extends BaseActivity implements OpenListAdapter.On
             history.setPath(currentPath);
             mHistory.add(history);
             loadFiles(item.getPath());
-        } else if (item.isMedia()) {
+        } else if (item.isVideo()) {
             playFile(item);
+        } else if (item.isImage()) {
+            viewImage(item);
         } else {
             Notify.show("Unsupported file type");
         }
+    }
+
+    private void viewImage(AListApi.AListFile file) {
+        String url = mApi.getFileUrl(file.getPath());
+        ImageViewerDialog.create().url(url).title(file.getName()).show(this);
     }
 
     private void playFile(AListApi.AListFile file) {

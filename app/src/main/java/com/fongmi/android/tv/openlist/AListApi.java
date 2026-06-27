@@ -215,7 +215,11 @@ public class AListApi {
     }
 
     public String getFileUrl(String path) {
-        String baseUrl = serverUrl + "d" + path;
+        String filePath = path;
+        if (filePath != null && filePath.startsWith("/")) {
+            filePath = filePath.substring(1);
+        }
+        String baseUrl = serverUrl + "d/" + filePath;
         if (!TextUtils.isEmpty(token)) {
             baseUrl += "?token=" + token;
         }
@@ -262,6 +266,13 @@ public class AListApi {
                    ext.equals("m2ts") || ext.equals("mpg") || ext.equals("mpeg");
         }
 
+        public boolean isImage() {
+            String ext = getExtension();
+            return ext.equals("jpg") || ext.equals("jpeg") || ext.equals("png") ||
+                   ext.equals("gif") || ext.equals("bmp") || ext.equals("webp") ||
+                   ext.equals("svg") || ext.equals("tiff");
+        }
+
         public boolean isAudio() {
             String ext = getExtension();
             return ext.equals("mp3") || ext.equals("flac") || ext.equals("wav") ||
@@ -270,7 +281,15 @@ public class AListApi {
         }
 
         public boolean isMedia() {
-            return isVideo() || isAudio();
+            return isVideo() || isImage();
+        }
+
+        public String getSizeStr() {
+            if (isFolder) return "";
+            if (size <= 0) return "0 B";
+            final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
+            int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+            return String.format("%.1f %s", size / Math.pow(1024, digitGroups), units[digitGroups]);
         }
     }
 }

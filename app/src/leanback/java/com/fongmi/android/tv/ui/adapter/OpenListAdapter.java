@@ -1,5 +1,6 @@
 package com.fongmi.android.tv.ui.adapter;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -28,7 +29,11 @@ public class OpenListAdapter extends RecyclerView.Adapter<OpenListAdapter.ViewHo
 
     public void addAll(List<AListApi.AListFile> items) {
         mItems.clear();
-        mItems.addAll(items);
+        for (AListApi.AListFile file : items) {
+            if (file.isFolder() || file.isVideo() || file.isImage()) {
+                mItems.add(file);
+            }
+        }
         notifyDataSetChanged();
     }
 
@@ -42,7 +47,23 @@ public class OpenListAdapter extends RecyclerView.Adapter<OpenListAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         AListApi.AListFile item = mItems.get(position);
         holder.binding.name.setText(item.getName());
-        holder.binding.icon.setImageResource(item.isFolder() ? R.drawable.ic_folder : R.drawable.ic_file);
+        StringBuilder info = new StringBuilder();
+        if (item.isFolder()) {
+            holder.binding.icon.setImageResource(R.drawable.ic_folder);
+            info.append("文件夹");
+        } else if (item.isVideo()) {
+            holder.binding.icon.setImageResource(R.drawable.ic_file);
+            info.append("视频");
+        } else if (item.isImage()) {
+            holder.binding.icon.setImageResource(R.drawable.ic_file);
+            info.append("图片");
+        } else {
+            holder.binding.icon.setImageResource(R.drawable.ic_file);
+        }
+        if (!TextUtils.isEmpty(item.getSizeStr())) {
+            info.append(" · ").append(item.getSizeStr());
+        }
+        holder.binding.info.setText(info.toString());
         holder.binding.getRoot().setOnClickListener(view -> {
             if (mListener != null) mListener.onItemClick(item);
         });
