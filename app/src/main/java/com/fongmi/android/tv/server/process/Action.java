@@ -18,6 +18,8 @@ import com.fongmi.android.tv.impl.Callback;
 import com.fongmi.android.tv.server.Nano;
 import com.fongmi.android.tv.server.Server;
 import com.fongmi.android.tv.server.impl.Process;
+import com.fongmi.android.tv.openlist.AListApi;
+import com.fongmi.android.tv.openlist.OpenListSetting;
 import com.fongmi.android.tv.service.PlaybackService;
 import com.fongmi.android.tv.utils.FileUtil;
 import com.fongmi.android.tv.utils.Notify;
@@ -56,6 +58,7 @@ public class Action implements Process {
             case "search" -> onSearch(params);
             case "setting" -> onSetting(params);
             case "openlist" -> onOpenlist(params);
+            case "openlistLogin" -> onOpenlistLogin(params);
             case "refresh" -> onRefresh(params);
             case "control" -> onControl(params);
             case "danmaku" -> onDanmaku(params);
@@ -151,6 +154,29 @@ public class Action implements Process {
         String path = params.get("path");
         if (TextUtils.isEmpty(url)) return;
         ServerEvent.openlist(url, token != null ? token : "", path != null ? path : "/");
+    }
+
+    private void onOpenlistLogin(Map<String, String> params) {
+        String url = params.get("url");
+        String username = params.get("username");
+        String password = params.get("password");
+        if (TextUtils.isEmpty(url) || TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
+            Notify.show("请填写完整信息");
+            return;
+        }
+        AListApi api = new AListApi(url, "");
+        api.login(username, password, new AListApi.LoginCallback() {
+            @Override
+            public void onSuccess(String token) {
+                OpenListSetting.putServerUrl(url);
+                OpenListSetting.putToken(token);
+                Notify.show("登录成功，网盘已配置");
+            }
+            @Override
+            public void onError(String error) {
+                Notify.show("登录失败: " + error);
+            }
+        });
     }
 
     private void onCast(Map<String, String> params) {

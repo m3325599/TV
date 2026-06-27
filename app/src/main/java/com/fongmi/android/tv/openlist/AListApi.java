@@ -42,6 +42,51 @@ public class AListApi {
         return serverUrl;
     }
 
+    public interface LoginCallback {
+        void onSuccess(String token);
+        void onError(String error);
+    }
+
+    public void login(String username, String password, LoginCallback callback) {
+        Task.execute(() -> {
+            try {
+                String url = serverUrl + "api/auth/login";
+                JSONObject body = new JSONObject();
+                body.put("username", username);
+                body.put("password", password);
+
+                RequestBody requestBody = RequestBody.create(
+                        MediaType.parse("application/json"),
+                        body.toString()
+                );
+
+                Request request = new Request.Builder()
+                        .url(url)
+                        .post(requestBody)
+                        .build();
+
+                Response response = OkHttp.client().newCall(request).execute();
+                String result = response.body().string();
+
+                JSONObject json = new JSONObject(result);
+                int code = json.getInt("code");
+                if (code != 200) {
+                    String msg = json.optString("message", "Login failed");
+                    App.post(() -> callback.onError(msg));
+                    return;
+                }
+
+                JSONObject data = json.getJSONObject("data");
+                String token = data.getString("token");
+                App.post(() -> callback.onSuccess(token));
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                App.post(() -> callback.onError(e.getMessage()));
+            }
+        });
+    }
+
     public interface ListCallback {
         void onSuccess(List<AListFile> files);
         void onError(String error);
@@ -68,7 +113,7 @@ public class AListApi {
                         .post(requestBody);
 
                 if (!TextUtils.isEmpty(token)) {
-                    builder.addHeader("Authorization", token);
+                    builder.addHeader("Authorization", "Bearer " + token);
                 }
 
                 Response response = OkHttp.client().newCall(builder.build()).execute();
@@ -130,7 +175,7 @@ public class AListApi {
                         .post(requestBody);
 
                 if (!TextUtils.isEmpty(token)) {
-                    builder.addHeader("Authorization", token);
+                    builder.addHeader("Authorization", "Bearer " + token);
                 }
 
                 Response response = OkHttp.client().newCall(builder.build()).execute();

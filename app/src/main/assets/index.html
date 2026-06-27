@@ -91,10 +91,28 @@
                         <div class="md-field">
                             <input id="openlist_url" class="md-input" type="text" placeholder="网盘服务器地址" />
                         </div>
-                        <div class="md-field">
-                            <input id="openlist_token" class="md-input" type="text" placeholder="Token (可选)" />
+                        <!-- 认证方式选择 -->
+                        <div class="auth-tabs">
+                            <div class="auth-tab active" onclick="showAuthMode('token')">Token登录</div>
+                            <div class="auth-tab" onclick="showAuthMode('password')">账号密码</div>
                         </div>
-                        <button onclick="setOpenlist()" class="md-btn md-btn-filled md-btn-full">设置网盘</button>
+                        <!-- Token方式 -->
+                        <div id="auth_token" class="auth-panel">
+                            <div class="md-field">
+                                <input id="openlist_token" class="md-input" type="text" placeholder="Token" />
+                            </div>
+                            <button onclick="setOpenlistByToken()" class="md-btn md-btn-filled md-btn-full">设置网盘</button>
+                        </div>
+                        <!-- 账号密码方式 -->
+                        <div id="auth_password" class="auth-panel" style="display:none">
+                            <div class="md-field">
+                                <input id="openlist_username" class="md-input" type="text" placeholder="用户名" />
+                            </div>
+                            <div class="md-field">
+                                <input id="openlist_password" class="md-input" type="password" placeholder="密码" />
+                            </div>
+                            <button onclick="loginOpenlist()" class="md-btn md-btn-filled md-btn-full">登录并设置</button>
+                        </div>
                     </div>
                 </div>
             </div>

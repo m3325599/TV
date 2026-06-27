@@ -486,3 +486,34 @@ html, body {
     margin-bottom: 0;
 }
 
+/* ══ Auth Tabs ══ */
+.auth-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.auth-tab {
+    flex: 1;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    background: var(--md-surface-variant);
+    color: var(--md-on-surface-variant);
+    transition: background 0.2s, color 0.2s;
+}
+
+.auth-tab.active {
+    background: var(--md-secondary-container);
+    color: var(--md-on-secondary-container);
+}
+
+.auth-panel {
+    margin-top: 8px;
+}
+

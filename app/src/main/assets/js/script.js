@@ -48,6 +48,39 @@ function setOpenlist() {
     warnToast('网盘配置已设置');
 }
 
+function showAuthMode(mode) {
+    $('.auth-tab').removeClass('active');
+    if (mode === 'token') {
+        $('.auth-tab:first').addClass('active');
+        $('#auth_token').show();
+        $('#auth_password').hide();
+    } else {
+        $('.auth-tab:last').addClass('active');
+        $('#auth_token').hide();
+        $('#auth_password').show();
+    }
+}
+
+function setOpenlistByToken() {
+    const url = $('#openlist_url').val().trim();
+    const token = $('#openlist_token').val().trim();
+    if (!url) { warnToast('请输入网盘服务器地址'); return; }
+    if (!token) { warnToast('请输入Token'); return; }
+    doAction('openlist', { url: url, token: token });
+    warnToast('网盘配置已设置');
+}
+
+function loginOpenlist() {
+    const url = $('#openlist_url').val().trim();
+    const username = $('#openlist_username').val().trim();
+    const password = $('#openlist_password').val().trim();
+    if (!url) { warnToast('请输入网盘服务器地址'); return; }
+    if (!username) { warnToast('请输入用户名'); return; }
+    if (!password) { warnToast('请输入密码'); return; }
+    $('#loadingToast').show();
+    doAction('openlistLogin', { url: url, username: username, password: password });
+}
+
 function sendDanmaku() {
     const text = $('#danmaku_text').val().trim();
     if (!text) return;
