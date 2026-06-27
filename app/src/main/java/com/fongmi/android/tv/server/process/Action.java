@@ -25,7 +25,6 @@ import com.fongmi.android.tv.utils.FileUtil;
 import com.fongmi.android.tv.utils.Notify;
 import com.github.catvod.net.OkHttp;
 import com.github.catvod.utils.Path;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.util.HashMap;
