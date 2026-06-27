@@ -80,7 +80,7 @@
                 android:tag="0"
                 android:textColor="@color/selector_control"
                 android:textSize="14sp"
-                tools:text="預設" />
+                tools:text="默认" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/scale_1"

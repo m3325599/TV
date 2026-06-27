@@ -78,7 +78,36 @@ function loginOpenlist() {
     if (!username) { warnToast('请输入用户名'); return; }
     if (!password) { warnToast('请输入密码'); return; }
     $('#loadingToast').show();
-    doAction('openlistLogin', { url: url, username: username, password: password });
+    $.ajax({
+        url: '/action',
+        type: 'post',
+        data: { do: 'openlistLogin', url: url, username: username, password: password },
+        timeout: 30000,
+        success: function (res) {
+            $('#loadingToast').hide();
+            try {
+                const data = (typeof res === 'string') ? JSON.parse(res) : res;
+                if (data && data.code === 200) {
+                    warnToast('登录成功');
+                } else {
+                    warnToast(data && data.message ? data.message : '登录失败');
+                }
+            } catch (e) {
+                warnToast('登录成功');
+            }
+        },
+        error: function (xhr) {
+            $('#loadingToast').hide();
+            let msg = '登录失败';
+            try {
+                const data = JSON.parse(xhr.responseText);
+                if (data && data.message) msg = data.message;
+            } catch (e) {
+                if (xhr.responseText) msg = xhr.responseText;
+            }
+            warnToast(msg);
+        }
+    });
 }
 
 function sendDanmaku() {
@@ -194,14 +223,14 @@ function listFile(path, addHistory = false) {
             info = JSON.parse(res);
         } catch (e) {
             $('#loadingToast').hide();
-            warnToast('回應格式錯誤');
+            warnToast('响应格式错误');
             return;
         }
         const parent = info.parent;
         currentRoot = path;
         currentParent = parent;
         const array = info.files;
-        if (path === '' && array.length === 0) warnToast('可能沒有存儲權限');
+        if (path === '' && array.length === 0) warnToast('可能没有存储权限');
         $('#file_list').html('');
         if (parent !== '.') addFile(buildParentItem());
         array.forEach(node => {
@@ -213,7 +242,7 @@ function listFile(path, addHistory = false) {
     }).fail(function () {
         clearTimeout(loadingTimer);
         $('#loadingToast').hide();
-        warnToast('載入失敗');
+        warnToast('加载失败');
     });
 }
 
@@ -267,13 +296,13 @@ function confirmNewFolder(yes) {
         listFile(currentRoot);
     }).fail(function () {
         $('#loadingToast').hide();
-        warnToast('新增失敗');
+        warnToast('新增失败');
     });
 }
 
 function showDelFolderDialog(path, refreshPath) {
     pendingDelFolder = { path, refreshPath };
-    $('#delFolderContent').text('是否刪除 ' + path);
+    $('#delFolderContent').text('是否删除 ' + path);
     openDialog('delFolder');
 }
 
@@ -288,13 +317,13 @@ function confirmDelFolder(yes) {
         listFile(refreshPath);
     }).fail(function () {
         $('#loadingToast').hide();
-        warnToast('刪除失敗');
+        warnToast('删除失败');
     });
 }
 
 function showDelFileDialog(path) {
     currentFile = path;
-    $('#delFileContent').text('是否刪除 ' + path);
+    $('#delFileContent').text('是否删除 ' + path);
     openDialog('delFile');
 }
 
@@ -307,7 +336,7 @@ function confirmDelFile(yes) {
         listFile(currentRoot);
     }).fail(function () {
         $('#loadingToast').hide();
-        warnToast('刪除失敗');
+        warnToast('删除失败');
     });
 }
 

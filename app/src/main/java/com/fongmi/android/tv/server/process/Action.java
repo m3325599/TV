@@ -25,10 +25,15 @@ import com.fongmi.android.tv.utils.FileUtil;
 import com.fongmi.android.tv.utils.Notify;
 import com.github.catvod.net.OkHttp;
 import com.github.catvod.utils.Path;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import fi.iki.elonen.NanoHTTPD.IHTTPSession;
 import fi.iki.elonen.NanoHTTPD.Response;
@@ -45,8 +50,71 @@ public class Action implements Process {
     public Response doResponse(IHTTPSession session, String url, Map<String, String> files) {
         Map<String, String> params = session.getParms();
         String param = params.get("do");
-        if (!TextUtils.isEmpty(param)) doJob(param, params);
+        if (TextUtils.isEmpty(param)) return Nano.ok();
+        // 登录请求需要返回 JSON 响应
+        if ("openlistLogin".equals(param)) {
+            return doOpenlistLogin(params);
+        }
+        doJob(param, params);
         return Nano.ok();
+    }
+
+    private Response doOpenlistLogin(Map<String, String> params) {
+        String url = params.get("url");
+        String username = params.get("username");
+        String password = params.get("password");
+        if (TextUtils.isEmpty(url) || TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
+            return jsonResponse(400, "请填写完整信息", null);
+        }
+        // 同步等待登录结果
+        CountDownLatch latch = new CountDownLatch(1);
+        final String[] resultToken = {null};
+        final String[] resultError = {null};
+        try {
+            AListApi api = new AListApi(url, "");
+            api.login(username, password, new AListApi.LoginCallback() {
+                @Override
+                public void onSuccess(String token) {
+                    resultToken[0] = token;
+                    OpenListSetting.putServerUrl(url);
+                    OpenListSetting.putToken(token);
+                    latch.countDown();
+                }
+                @Override
+                public void onError(String error) {
+                    resultError[0] = error;
+                    latch.countDown();
+                }
+            });
+            // 等待登录结果，最多 30 秒
+            boolean ok = latch.await(30, TimeUnit.SECONDS);
+            if (!ok) {
+                return jsonResponse(500, "登录超时", null);
+            }
+        } catch (Exception e) {
+            return jsonResponse(500, "登录失败: " + e.getMessage(), null);
+        }
+        if (resultToken[0] != null) {
+            Map<String, String> data = new HashMap<>();
+            data.put("token", resultToken[0]);
+            return jsonResponse(200, "登录成功", data);
+        } else {
+            return jsonResponse(401, resultError[0] != null ? resultError[0] : "登录失败", null);
+        }
+    }
+
+    private Response jsonResponse(int code, String message, Map<String, String> data) {
+        JsonObject json = new JsonObject();
+        json.addProperty("code", code);
+        json.addProperty("message", message);
+        if (data != null) {
+            JsonObject dataObj = new JsonObject();
+            for (Map.Entry<String, String> entry : data.entrySet()) {
+                dataObj.addProperty(entry.getKey(), entry.getValue());
+            }
+            json.add("data", dataObj);
+        }
+        return new Response(Response.Status.OK, "application/json; charset=utf-8", json.toString());
     }
 
     private void doJob(String param, Map<String, String> params) {
@@ -58,7 +126,6 @@ public class Action implements Process {
             case "search" -> onSearch(params);
             case "setting" -> onSetting(params);
             case "openlist" -> onOpenlist(params);
-            case "openlistLogin" -> onOpenlistLogin(params);
             case "refresh" -> onRefresh(params);
             case "control" -> onControl(params);
             case "danmaku" -> onDanmaku(params);
@@ -154,29 +221,6 @@ public class Action implements Process {
         String path = params.get("path");
         if (TextUtils.isEmpty(url)) return;
         ServerEvent.openlist(url, token != null ? token : "", path != null ? path : "/");
-    }
-
-    private void onOpenlistLogin(Map<String, String> params) {
-        String url = params.get("url");
-        String username = params.get("username");
-        String password = params.get("password");
-        if (TextUtils.isEmpty(url) || TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
-            Notify.show("请填写完整信息");
-            return;
-        }
-        AListApi api = new AListApi(url, "");
-        api.login(username, password, new AListApi.LoginCallback() {
-            @Override
-            public void onSuccess(String token) {
-                OpenListSetting.putServerUrl(url);
-                OpenListSetting.putToken(token);
-                Notify.show("登录成功，网盘已配置");
-            }
-            @Override
-            public void onError(String error) {
-                Notify.show("登录失败: " + error);
-            }
-        });
     }
 
     private void onCast(Map<String, String> params) {

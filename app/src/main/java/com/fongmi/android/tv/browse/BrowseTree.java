@@ -24,8 +24,8 @@ public class BrowseTree {
     private static final String VOD = "VOD";
     private static final String LIVE = "LIVE";
     private static final Map<String, Result> browseResultMap = new ConcurrentHashMap<>();
-    private static final MediaItem ROOT_ITEM = folder(ROOT, "影視");
-    private static final MediaItem VOD_FOLDER = folder(VOD, "點播");
+    private static final MediaItem ROOT_ITEM = folder(ROOT, "影视");
+    private static final MediaItem VOD_FOLDER = folder(VOD, "点播");
     private static final MediaItem LIVE_FOLDER;
 
     static {

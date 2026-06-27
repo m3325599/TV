@@ -22,6 +22,6 @@
         android:layout_marginTop="4dp"
         android:textColor="@color/white"
         android:textSize="18sp"
-        tools:text="點播" />
+        tools:text="点播" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>

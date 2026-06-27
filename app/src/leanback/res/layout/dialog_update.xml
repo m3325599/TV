@@ -36,7 +36,7 @@
             android:lineSpacingExtra="8dp"
             android:textColor="@color/white"
             android:textSize="16sp"
-            tools:text="1. 新增 ffmpeg 音頻軟解\n2. 詳情頁新增分詞快搜\n3. 修復搜尋閃退問題\n4. 設定支援渲染切換" />
+            tools:text="1. 新增 ffmpeg 音频软解\n2. 详情页新增分词快搜\n3. 修复搜索闪退问题\n4. 设置支持渲染切换" />
 
     </androidx.core.widget.NestedScrollView>
 

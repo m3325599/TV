@@ -1,20 +1,26 @@
 <resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
 
     <!-- Home -->
-    <string name="home_vod">點播</string>
+    <string name="home_vod">点播</string>
     <string name="home_live">直播</string>
-    <string name="home_search">搜尋</string>
+    <string name="home_search">搜索</string>
     <string name="home_keep">收藏</string>
     <string name="home_push">推送</string>
-    <string name="home_setting">設定</string>
-    <string name="home_history">最近觀看</string>
-    <string name="home_recommend">更新推薦</string>
+    <string name="home_setting">设置</string>
+    <string name="home_history">最近观看</string>
+    <string name="home_recommend">更新推荐</string>
+    <string name="openlist">网盘</string>
+    <string name="setting_openlist_server">网盘地址</string>
+    <string name="setting_openlist_token">网盘令牌</string>
+    <string name="setting_openlist_path">网盘挂载路径</string>
+    <string name="setting_download_path">下载路径</string>
+    <string name="select_current_dir">选择此目录</string>
 
     <!-- Collect -->
-    <string name="collect_result">「<xliff:g name="name">%s</xliff:g>」的搜尋結果</string>
+    <string name="collect_result">“<xliff:g name="name">%s</xliff:g>”的搜索结果</string>
 
     <!-- Push -->
-    <string name="push_clip">推送剪貼簿內容</string>
-    <string name="push_info">使用手機掃描 QR Code，或於瀏覽器輸入網址\n<xliff:g name="name">%s</xliff:g></string>
+    <string name="push_clip">推送剪贴板内容</string>
+    <string name="push_info">使用手机扫描二维码，或于浏览器访问地址\n<xliff:g name="name">%s</xliff:g></string>
 
 </resources>
