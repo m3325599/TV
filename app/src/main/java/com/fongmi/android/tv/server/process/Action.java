@@ -2,6 +2,8 @@ package com.fongmi.android.tv.server.process;
 
 import android.text.TextUtils;
 
+import static fi.iki.elonen.NanoHTTPD.newFixedLengthResponse;
+
 import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.api.config.VodConfig;
@@ -113,7 +115,7 @@ public class Action implements Process {
             }
             json.add("data", dataObj);
         }
-        return new Response(Response.Status.OK, "application/json; charset=utf-8", json.toString());
+        return newFixedLengthResponse(Response.Status.OK, "application/json; charset=utf-8", json.toString());
     }
 
     private void doJob(String param, Map<String, String> params) {
