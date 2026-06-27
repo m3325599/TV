@@ -44,6 +44,20 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Verify Python installation and create python3.10 symlink
+        run: |
+          python3 --version
+          which python3
+          python --version
+          which python
+          PYTHON_DIR=$(dirname $(which python3))
+          if [ ! -f "$PYTHON_DIR/python3.10" ]; then
+            ln -s "$PYTHON_DIR/python3" "$PYTHON_DIR/python3.10"
+            echo "Created python3.10 symlink"
+          fi
+          python3.10 --version
+          which python3.10
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
