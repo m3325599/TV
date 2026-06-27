@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         flavor: [leanback, mobile]
-        abi: [arm64_v8a]
+        abi: [arm64_v8a, armeabi_v7a]
         build_type: [debug, release]
     steps:
       - name: Checkout code
