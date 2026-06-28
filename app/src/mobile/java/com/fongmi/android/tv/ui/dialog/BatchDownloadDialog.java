@@ -17,6 +17,7 @@ import androidx.viewbinding.ViewBinding;
 import com.fongmi.android.tv.bean.Episode;
 import com.fongmi.android.tv.databinding.DialogBatchDownloadBinding;
 import com.fongmi.android.tv.databinding.ItemDownloadEpisodeBinding;
+import com.fongmi.android.tv.utils.ResUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,11 @@ public class BatchDownloadDialog extends BaseSideSheetDialog {
     @Override
     protected ViewBinding getBinding(@NonNull LayoutInflater inflater, @Nullable ViewGroup container) {
         return binding = DialogBatchDownloadBinding.inflate(inflater, container, false);
+    }
+
+    @Override
+    protected int getWidth() {
+        return Math.min(ResUtil.dp2px(420), ResUtil.getScreenWidth() / 2);
     }
 
     @Override
