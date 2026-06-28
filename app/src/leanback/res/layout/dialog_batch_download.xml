@@ -28,7 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/download_select_all"
-            android:textColor="@color/primary"
+            android:textColor="@color/white"
             android:textSize="14sp"
             android:padding="8dp"
             android:focusable="true"
