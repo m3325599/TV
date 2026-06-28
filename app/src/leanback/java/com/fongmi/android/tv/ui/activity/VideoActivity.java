@@ -1121,6 +1121,7 @@ public class VideoActivity extends PlaybackActivity implements CustomKeyDownVod.
         if (player().isPortrait() && getScale() == 0) {
             setScale(4);
         }
+        mBinding.widget.size.setText(player().getSizeText());
     }
 
     @Override
@@ -1147,11 +1148,6 @@ public class VideoActivity extends PlaybackActivity implements CustomKeyDownVod.
             if (isFullscreen()) showInfo();
             else hideInfo();
         }
-    }
-
-    @Override
-    protected void onSizeChanged(VideoSize size) {
-        mBinding.widget.size.setText(player().getSizeText());
     }
 
     @Override
