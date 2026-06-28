@@ -24,12 +24,14 @@ import com.fongmi.android.tv.impl.Callback;
 import com.fongmi.android.tv.impl.ConfigListener;
 import com.fongmi.android.tv.impl.LiveListener;
 import com.fongmi.android.tv.impl.SiteListener;
+import com.fongmi.android.tv.setting.DownloadSetting;
 import com.fongmi.android.tv.setting.PlayerSetting;
 import com.fongmi.android.tv.setting.Setting;
 import com.fongmi.android.tv.openlist.OpenListSetting;
 import com.fongmi.android.tv.ui.base.BaseActivity;
 import com.fongmi.android.tv.ui.dialog.ConfigDialog;
 import com.fongmi.android.tv.ui.dialog.DohDialog;
+import com.fongmi.android.tv.ui.dialog.DownloadPathDialog;
 import com.fongmi.android.tv.ui.dialog.HistoryDialog;
 import com.fongmi.android.tv.ui.dialog.InputDialog;
 import com.fongmi.android.tv.ui.dialog.LiveDialog;
@@ -86,6 +88,7 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
         mBinding.versionText.setText(BuildConfig.VERSION_NAME);
         mBinding.openlistServerText.setText(OpenListSetting.getServerUrl());
         mBinding.openlistTokenText.setText(OpenListSetting.getToken());
+        mBinding.downloadPathText.setText(DownloadSetting.getPath());
         setCacheText();
         setOtherText();
     }
@@ -110,6 +113,7 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
         super.onResume();
         mBinding.openlistServerText.setText(OpenListSetting.getServerUrl());
         mBinding.openlistTokenText.setText(OpenListSetting.getToken());
+        mBinding.downloadPathText.setText(DownloadSetting.getPath());
     }
 
     @Override
@@ -127,6 +131,7 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
         mBinding.version.setOnClickListener(this::onVersion);
         mBinding.openlistServer.setOnClickListener(this::onOpenlistServer);
         mBinding.openlistToken.setOnClickListener(this::onOpenlistServer);
+        mBinding.downloadPath.setOnClickListener(this::onDownloadPath);
         mBinding.vod.setOnLongClickListener(this::onVodEdit);
         mBinding.vodHome.setOnClickListener(this::onVodHome);
         mBinding.live.setOnLongClickListener(this::onLiveEdit);
@@ -291,6 +296,10 @@ public class SettingActivity extends BaseActivity implements ConfigListener, Sit
 
     private void onOpenlistServer(View view) {
         OpenListConfigDialog.create().show(this);
+    }
+
+    private void onDownloadPath(View view) {
+        DownloadPathDialog.create().show(this);
     }
 
     private void onCache(View view) {

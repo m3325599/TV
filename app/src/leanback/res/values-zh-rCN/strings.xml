@@ -13,7 +13,16 @@
     <string name="setting_openlist_server">网盘地址</string>
     <string name="setting_openlist_token">网盘令牌</string>
     <string name="setting_openlist_path">网盘挂载路径</string>
+    <string name="openlist_config_set">网盘配置已设置</string>
     <string name="setting_download_path">下载路径</string>
+    <string name="setting_default">默认</string>
+    <string name="download_available_space">可用空间: <xliff:g name="size">%s</xliff:g></string>
+    <string name="download_path_empty">下载路径不能为空</string>
+    <string name="download_path_create_failed">创建下载目录失败</string>
+    <string name="download_path_no_write_permission">下载目录无写入权限</string>
+    <string name="download_path_set_success">下载路径设置成功</string>
+    <string name="vod_config_set">点播源已设置</string>
+    <string name="live_config_set">直播源已设置</string>
     <string name="select_current_dir">选择此目录</string>
 
     <!-- Collect -->

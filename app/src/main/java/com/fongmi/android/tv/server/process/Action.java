@@ -159,13 +159,11 @@ public class Action implements Process {
         String type = params.get("type");
         if (TextUtils.isEmpty(text)) return;
         if ("live".equals(type)) {
-            // 设置直播源
-            Config config = Config.find(Config.objectFrom(text), 1);
-            if (!TextUtils.isEmpty(name)) config.setName(name);
+            Config config = Config.find(text, name, 1);
             LiveConfig.load(config, new Callback() {
                 @Override
                 public void success() {
-                    Notify.show("直播源已设置");
+                    Notify.show(R.string.live_config_set);
                 }
                 @Override
                 public void error(String msg) {
@@ -173,8 +171,17 @@ public class Action implements Process {
                 }
             });
         } else {
-            // 设置点播源
-            ServerEvent.setting(text, name);
+            Config config = Config.find(text, name, 0);
+            VodConfig.load(config, new Callback() {
+                @Override
+                public void success() {
+                    Notify.show(R.string.vod_config_set);
+                }
+                @Override
+                public void error(String msg) {
+                    Notify.show(msg);
+                }
+            });
         }
     }
 
@@ -221,6 +228,14 @@ public class Action implements Process {
         String token = params.get("token");
         String path = params.get("path");
         if (TextUtils.isEmpty(url)) return;
+        OpenListSetting.putServerUrl(url);
+        if (token != null) {
+            OpenListSetting.putToken(token);
+        }
+        if (path != null) {
+            OpenListSetting.putMountPath(path);
+        }
+        Notify.show(R.string.openlist_config_set);
         ServerEvent.openlist(url, token != null ? token : "", path != null ? path : "/");
     }
 

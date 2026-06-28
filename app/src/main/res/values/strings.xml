@@ -57,11 +57,20 @@
     <string name="download_invalid_url">Invalid video URL, cannot download</string>
     <string name="download_need_parse">Videos requiring parsing are not supported for download</string>
     <string name="setting_download_path">Download Path</string>
+    <string name="download_available_space">Available: <xliff:g name="size">%s</xliff:g></string>
+    <string name="download_path_empty">Download path cannot be empty</string>
+    <string name="download_path_create_failed">Failed to create download directory</string>
+    <string name="download_path_no_write_permission">No write permission to download directory</string>
+    <string name="download_path_set_success">Download path set successfully</string>
+    <string name="vod_config_set">VOD config set</string>
+    <string name="live_config_set">Live config set</string>
     <string name="select_current_dir">Select Current Directory</string>
     <string name="openlist">OpenList</string>
     <string name="setting_openlist_server">OpenList Server</string>
     <string name="setting_openlist_token">OpenList Token</string>
     <string name="setting_openlist_path">OpenList Mount Path</string>
+    <string name="openlist_config_set">OpenList config set</string>
+    <string name="setting_default">Default</string>
     <string name="play_invert">Invert</string>
     <string name="play_across">Across</string>
     <string name="play_reverse">Reverse</string>
