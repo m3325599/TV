@@ -49,7 +49,7 @@ public class OpenListActivity extends BaseActivity implements OpenListAdapter.On
 
     private void setRecyclerView() {
         mBinding.recycler.setHasFixedSize(true);
-        mBinding.recycler.setVerticalSpacing(ResUtil.dp2px(16));
+        mBinding.recycler.setVerticalSpacing(ResUtil.dp2px(2));
         mBinding.recycler.setAdapter(mAdapter = new OpenListAdapter(this));
     }
 
@@ -96,14 +96,31 @@ public class OpenListActivity extends BaseActivity implements OpenListAdapter.On
     }
 
     private void viewImage(AListApi.AListFile file) {
-        String url = mApi.getFileUrl(file.getPath());
-        ImageViewerDialog.create().url(url).title(file.getName()).show(this);
+        mApi.getFsUrl(file.getPath(), new AListApi.FsGetCallback() {
+            @Override
+            public void onSuccess(String rawUrl) {
+                ImageViewerDialog.create().url(rawUrl).title(file.getName()).show(OpenListActivity.this);
+            }
+
+            @Override
+            public void onError(String error) {
+                Notify.show("图片加载失败: " + error);
+            }
+        });
     }
 
     private void playFile(AListApi.AListFile file) {
-        String url = mApi.getFileUrl(file.getPath());
-        String name = file.getName();
-        VideoActivity.start(this, SiteApi.PUSH, url, name);
+        mApi.getFsUrl(file.getPath(), new AListApi.FsGetCallback() {
+            @Override
+            public void onSuccess(String rawUrl) {
+                VideoActivity.start(OpenListActivity.this, SiteApi.PUSH, rawUrl, file.getName());
+            }
+
+            @Override
+            public void onError(String error) {
+                Notify.show("获取播放地址失败: " + error);
+            }
+        });
     }
 
     @Override

@@ -38,6 +38,12 @@ public class AListApi {
         this.token = token;
     }
 
+    private String getAuthHeader() {
+        if (TextUtils.isEmpty(token)) return "";
+        if (token.startsWith("Bearer ")) return token;
+        return "Bearer " + token;
+    }
+
     public String getServerUrl() {
         return serverUrl;
     }
@@ -113,7 +119,7 @@ public class AListApi {
                         .post(requestBody);
 
                 if (!TextUtils.isEmpty(token)) {
-                    builder.addHeader("Authorization", token);
+                    builder.addHeader("Authorization", getAuthHeader());
                 }
 
                 Response response = OkHttp.client().newCall(builder.build()).execute();
@@ -135,7 +141,7 @@ public class AListApi {
                     JSONObject item = content.getJSONObject(i);
                     AListFile file = new AListFile();
                     file.setName(item.getString("name"));
-                    file.setPath(path + "/" + file.getName());
+                    file.setPath(normalizePath(path + "/" + file.getName()));
                     file.setIsFolder(item.getBoolean("is_dir"));
                     file.setSize(item.optLong("size", 0));
                     file.setModified(item.optString("modified", ""));
@@ -175,7 +181,7 @@ public class AListApi {
                         .post(requestBody);
 
                 if (!TextUtils.isEmpty(token)) {
-                    builder.addHeader("Authorization", token);
+                    builder.addHeader("Authorization", getAuthHeader());
                 }
 
                 Response response = OkHttp.client().newCall(builder.build()).execute();
@@ -199,7 +205,7 @@ public class AListApi {
                     if (isDir) {
                         AListFile file = new AListFile();
                         file.setName(item.getString("name"));
-                        file.setPath(path + "/" + file.getName());
+                        file.setPath(normalizePath(path + "/" + file.getName()));
                         file.setIsFolder(true);
                         files.add(file);
                     }
@@ -214,16 +220,77 @@ public class AListApi {
         });
     }
 
+    private String normalizePath(String path) {
+        if (TextUtils.isEmpty(path)) return "/";
+        String normalized = path.replaceAll("/+", "/");
+        if (normalized.length() > 1 && normalized.endsWith("/")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        return normalized;
+    }
+
     public String getFileUrl(String path) {
-        String filePath = path;
-        if (filePath != null && filePath.startsWith("/")) {
+        String filePath = normalizePath(path);
+        if (filePath.startsWith("/")) {
             filePath = filePath.substring(1);
         }
         String baseUrl = serverUrl + "d/" + filePath;
         if (!TextUtils.isEmpty(token)) {
-            baseUrl += "?token=" + token;
+            baseUrl += "?sign=" + token;
         }
         return baseUrl;
+    }
+
+    public interface FsGetCallback {
+        void onSuccess(String rawUrl);
+        void onError(String error);
+    }
+
+    public void getFsUrl(String path, FsGetCallback callback) {
+        Task.execute(() -> {
+            try {
+                String url = serverUrl + "api/fs/get";
+                JSONObject body = new JSONObject();
+                body.put("path", normalizePath(path));
+                body.put("password", "");
+
+                RequestBody requestBody = RequestBody.create(
+                        MediaType.parse("application/json"),
+                        body.toString()
+                );
+
+                Request.Builder builder = new Request.Builder()
+                        .url(url)
+                        .post(requestBody);
+
+                if (!TextUtils.isEmpty(token)) {
+                    builder.addHeader("Authorization", getAuthHeader());
+                }
+
+                Response response = OkHttp.client().newCall(builder.build()).execute();
+                String result = response.body().string();
+
+                JSONObject json = new JSONObject(result);
+                int code = json.getInt("code");
+                if (code != 200) {
+                    String msg = json.optString("message", "Unknown error");
+                    App.post(() -> callback.onError(msg));
+                    return;
+                }
+
+                JSONObject data = json.getJSONObject("data");
+                String rawUrl = data.optString("raw_url", "");
+                if (TextUtils.isEmpty(rawUrl)) {
+                    rawUrl = getFileUrl(path);
+                }
+                final String finalUrl = rawUrl;
+                App.post(() -> callback.onSuccess(finalUrl));
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                App.post(() -> callback.onError(e.getMessage()));
+            }
+        });
     }
 
     public static class AListFile {
