@@ -311,9 +311,9 @@ public class VideoActivity extends PlaybackActivity implements CustomKeyDownVod.
         mBinding.control.action.ending.setOnClickListener(view -> onEnding());
         mBinding.control.action.repeat.setOnClickListener(view -> onRepeat());
         mBinding.control.action.change2.setOnClickListener(view -> onChange());
-        mBinding.control.action.download.setOnClickListener(view -> onDownload());
-        mBinding.control.action.batchDownload.setOnClickListener(view -> onBatchDownload());
         mBinding.control.action.danmaku.setOnClickListener(view -> onDanmaku());
+        mBinding.download.setOnClickListener(view -> onDownload());
+        mBinding.batchDownload.setOnClickListener(view -> onBatchDownload());
         mBinding.control.action.opening.setOnClickListener(view -> onOpening());
         mBinding.control.action.speed.setOnLongClickListener(view -> onSpeedLong());
         mBinding.control.action.reset.setOnLongClickListener(view -> onResetToggle());
@@ -368,8 +368,8 @@ public class VideoActivity extends PlaybackActivity implements CustomKeyDownVod.
     private void setVideoView() {
         mBinding.control.action.danmaku.setVisibility(DanmakuSetting.isLoad() ? View.VISIBLE : View.GONE);
         mBinding.control.action.reset.setText(ResUtil.getStringArray(R.array.select_reset)[Setting.getReset()]);
-        mBinding.control.action.download.setVisibility(View.VISIBLE);
-        mBinding.control.action.batchDownload.setVisibility(View.VISIBLE);
+        mBinding.download.setVisibility(View.VISIBLE);
+        mBinding.batchDownload.setVisibility(View.VISIBLE);
     }
 
     private void setDecode() {

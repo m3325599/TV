@@ -202,6 +202,7 @@
             android:id="@+id/change1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
             android:background="@drawable/selector_item"
             android:drawablePadding="6dp"
             android:focusable="true"
@@ -214,6 +215,41 @@
             android:textColor="@color/white"
             android:textSize="16sp"
             app:drawableStartCompat="@drawable/ic_detail_change" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/download"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/selector_item"
+            android:drawablePadding="6dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:gravity="center"
+            android:nextFocusUp="@id/actor"
+            android:nextFocusDown="@id/flag"
+            android:singleLine="true"
+            android:text="@string/play_download"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:drawableStartCompat="@drawable/ic_download" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/batch_download"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_item"
+            android:drawablePadding="6dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:gravity="center"
+            android:nextFocusUp="@id/actor"
+            android:nextFocusDown="@id/flag"
+            android:singleLine="true"
+            android:text="@string/play_batch_download"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:drawableStartCompat="@drawable/ic_batch_download" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
