@@ -38,6 +38,18 @@
             android:text="@string/play_change" />
 
         <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/download"
+            style="@style/Control"
+            android:layout_marginEnd="12dp"
+            android:text="@string/play_download" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/batch_download"
+            style="@style/Control"
+            android:layout_marginEnd="12dp"
+            android:text="@string/play_batch_download" />
+
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/player"
             style="@style/Control"
             android:layout_marginEnd="12dp"

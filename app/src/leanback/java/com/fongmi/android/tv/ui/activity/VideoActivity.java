@@ -67,11 +67,13 @@ import com.fongmi.android.tv.ui.adapter.QuickAdapter;
 import com.fongmi.android.tv.ui.custom.CustomKeyDownVod;
 import com.fongmi.android.tv.ui.custom.CustomMovement;
 import com.fongmi.android.tv.ui.custom.CustomSeekView;
+import com.fongmi.android.tv.download.DownloadManager;
 import com.fongmi.android.tv.ui.dialog.ContentDialog;
 import com.fongmi.android.tv.ui.dialog.DanmakuDialog;
 import com.fongmi.android.tv.ui.dialog.SubtitleDialog;
 import com.fongmi.android.tv.ui.dialog.TitleDialog;
 import com.fongmi.android.tv.ui.dialog.TrackDialog;
+import com.fongmi.android.tv.ui.dialog.BatchDownloadDialog;
 import com.fongmi.android.tv.utils.Clock;
 import com.fongmi.android.tv.utils.FileChooser;
 import com.fongmi.android.tv.utils.ImgUtil;
@@ -309,6 +311,8 @@ public class VideoActivity extends PlaybackActivity implements CustomKeyDownVod.
         mBinding.control.action.ending.setOnClickListener(view -> onEnding());
         mBinding.control.action.repeat.setOnClickListener(view -> onRepeat());
         mBinding.control.action.change2.setOnClickListener(view -> onChange());
+        mBinding.control.action.download.setOnClickListener(view -> onDownload());
+        mBinding.control.action.batchDownload.setOnClickListener(view -> onBatchDownload());
         mBinding.control.action.danmaku.setOnClickListener(view -> onDanmaku());
         mBinding.control.action.opening.setOnClickListener(view -> onOpening());
         mBinding.control.action.speed.setOnLongClickListener(view -> onSpeedLong());
@@ -364,6 +368,8 @@ public class VideoActivity extends PlaybackActivity implements CustomKeyDownVod.
     private void setVideoView() {
         mBinding.control.action.danmaku.setVisibility(DanmakuSetting.isLoad() ? View.VISIBLE : View.GONE);
         mBinding.control.action.reset.setText(ResUtil.getStringArray(R.array.select_reset)[Setting.getReset()]);
+        mBinding.control.action.download.setVisibility(View.VISIBLE);
+        mBinding.control.action.batchDownload.setVisibility(View.VISIBLE);
     }
 
     private void setDecode() {
@@ -656,6 +662,30 @@ public class VideoActivity extends PlaybackActivity implements CustomKeyDownVod.
 
     private void onChange() {
         checkSearch(true);
+    }
+
+    private void onDownload() {
+        if (getEpisode() == null || TextUtils.isEmpty(getEpisode().getUrl())) {
+            Notify.show(R.string.download_invalid_url);
+            return;
+        }
+        DownloadManager.getInstance(this).downloadEpisode(getKey(), getFlag().getFlag(), getEpisode(), getName());
+    }
+
+    private void onBatchDownload() {
+        if (getFlag() == null || getFlag().getEpisodes() == null || getFlag().getEpisodes().isEmpty()) {
+            Notify.show(R.string.error_play_flag);
+            return;
+        }
+        BatchDownloadDialog.create()
+            .episodes(getFlag().getEpisodes())
+            .listener(episodes -> {
+                for (Episode episode : episodes) {
+                    DownloadManager.getInstance(VideoActivity.this).downloadEpisode(getKey(), getFlag().getFlag(), episode, getName());
+                }
+                Notify.show("已添加 " + episodes.size() + " 个下载任务");
+            })
+            .show(this);
     }
 
     private void onRepeat() {
@@ -1083,6 +1113,14 @@ public class VideoActivity extends PlaybackActivity implements CustomKeyDownVod.
     protected void onReclaim() {
         Result result = mViewModel.getPlayer().getValue();
         if (result != null) setPlayer(result);
+    }
+
+    @Override
+    protected void onSizeChanged(VideoSize size) {
+        if (size == null || size.width == 0 || size.height == 0) return;
+        if (player().isPortrait() && getScale() == 0) {
+            setScale(4);
+        }
     }
 
     @Override

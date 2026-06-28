@@ -44,6 +44,8 @@
     <string name="play_scale">原始</string>
     <string name="play_config">配置</string>
     <string name="play_change">换源</string>
+    <string name="play_download">下载</string>
+    <string name="play_batch_download">批量下载</string>
     <string name="play_invert">反转</string>
     <string name="play_across">跨类</string>
     <string name="play_reverse">倒序</string>
@@ -187,6 +189,15 @@
     <string name="error_play_drm">此设备不支持所需的 DRM scheme</string>
     <string name="error_play_url">播放地址加载失败</string>
     <string name="error_play_flag">暂无线路数据</string>
+    <string name="download_start">开始下载：%1$s</string>
+    <string name="download_progress">下载中：%1$d%%</string>
+    <string name="download_complete">下载完成：%1$s</string>
+    <string name="download_error">下载失败：%1$s</string>
+    <string name="download_select_episode">选择要下载的剧集</string>
+    <string name="download_select_all">全选</string>
+    <string name="download_start_batch">开始下载</string>
+    <string name="download_invalid_url">视频地址无效，无法下载</string>
+    <string name="download_need_parse">需要解析的视频暂不支持下载</string>
     <string name="error_play_timeout">连接超时</string>
     <string name="error_play_tvbus">错误代码：<xliff:g name="name">%s</xliff:g></string>
     <string name="error_detail">暂无播放数据</string>

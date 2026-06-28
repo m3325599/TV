@@ -88,6 +88,14 @@ public class PlayerSetting {
         Prefers.put("tunnel", tunnel);
     }
 
+    public static boolean isHardDecode() {
+        return Prefers.getBoolean("hard_decode", true);
+    }
+
+    public static void putHardDecode(boolean hardDecode) {
+        Prefers.put("hard_decode", hardDecode);
+    }
+
     public static boolean isAudioPrefer() {
         return Prefers.getBoolean("audio_prefer");
     }

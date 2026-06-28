@@ -58,6 +58,7 @@ import com.fongmi.android.tv.bean.Track;
 import com.fongmi.android.tv.bean.Vod;
 import com.fongmi.android.tv.databinding.ActivityVideoBinding;
 import com.fongmi.android.tv.db.AppDatabase;
+import com.fongmi.android.tv.download.DownloadManager;
 import com.fongmi.android.tv.event.CastEvent;
 import com.fongmi.android.tv.event.RefreshEvent;
 import com.fongmi.android.tv.impl.CustomTarget;
@@ -78,6 +79,7 @@ import com.fongmi.android.tv.ui.custom.CustomKeyDown;
 import com.fongmi.android.tv.ui.custom.CustomMovement;
 import com.fongmi.android.tv.ui.custom.CustomSeekView;
 import com.fongmi.android.tv.ui.custom.SpaceItemDecoration;
+import com.fongmi.android.tv.ui.dialog.BatchDownloadDialog;
 import com.fongmi.android.tv.ui.dialog.CastDialog;
 import com.fongmi.android.tv.ui.dialog.ControlDialog;
 import com.fongmi.android.tv.ui.dialog.DanmakuDialog;
@@ -340,6 +342,8 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, C
         mBinding.control.action.scale.setOnClickListener(view -> onScale());
         mBinding.control.action.speed.setOnClickListener(view -> onSpeed());
         mBinding.control.action.reset.setOnClickListener(view -> onReset());
+        mBinding.control.action.download.setOnClickListener(view -> onDownload());
+        mBinding.control.action.batchDownload.setOnClickListener(view -> onBatchDownload());
         mBinding.control.action.title.setOnClickListener(view -> onTitle());
         mBinding.control.action.player.setOnClickListener(view -> onChoose());
         mBinding.control.action.decode.setOnClickListener(view -> onDecode());
@@ -389,6 +393,8 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, C
     private void setVideoView() {
         mBinding.control.action.danmaku.setVisibility(DanmakuSetting.isLoad() ? View.VISIBLE : View.GONE);
         mBinding.control.action.reset.setText(ResUtil.getStringArray(R.array.select_reset)[Setting.getReset()]);
+        mBinding.control.action.download.setVisibility(View.VISIBLE);
+        mBinding.control.action.batchDownload.setVisibility(View.VISIBLE);
         mBinding.video.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> mPiP.update(this, view));
     }
 
@@ -664,6 +670,30 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, C
     private boolean onChange() {
         checkSearch(true);
         return true;
+    }
+
+    private void onDownload() {
+        if (getEpisode() == null || TextUtils.isEmpty(getEpisode().getUrl())) {
+            Notify.show(R.string.download_invalid_url);
+            return;
+        }
+        DownloadManager.getInstance(this).downloadEpisode(getKey(), getFlag().getFlag(), getEpisode(), getName());
+    }
+
+    private void onBatchDownload() {
+        if (getFlag() == null || getFlag().getEpisodes() == null || getFlag().getEpisodes().isEmpty()) {
+            Notify.show(R.string.error_play_flag);
+            return;
+        }
+        BatchDownloadDialog.create()
+            .episodes(getFlag().getEpisodes())
+            .listener(episodes -> {
+                for (Episode episode : episodes) {
+                    DownloadManager.getInstance(VideoActivity.this).downloadEpisode(getKey(), getFlag().getFlag(), episode, getName());
+                }
+                Notify.show("已添加 " + episodes.size() + " 个下载任务");
+            })
+            .show(this);
     }
 
     private boolean onCopy() {

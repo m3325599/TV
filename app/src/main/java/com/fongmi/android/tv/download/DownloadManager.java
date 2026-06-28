@@ -10,48 +10,27 @@ import com.fongmi.android.tv.api.SiteApi;
 import com.fongmi.android.tv.api.config.VodConfig;
 import com.fongmi.android.tv.bean.Episode;
 import com.fongmi.android.tv.bean.Result;
-import com.fongmi.android.tv.databinding.ActivityVideoBinding;
-import com.fongmi.android.tv.event.RefreshEvent;
-import com.fongmi.android.tv.model.SiteViewModel;
-import com.fongmi.android.tv.player.PlayerManager;
-import com.fongmi.android.tv.utils.FileUtil;
 import com.fongmi.android.tv.utils.Notify;
 import com.fongmi.android.tv.utils.Task;
+import com.github.catvod.net.OkHttp;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import androidx.lifecycle.ViewModelProvider;
-import androidx.media3.common.MediaItem;
-import androidx.media3.common.Player;
-import androidx.media3.exoplayer.ExoPlayer;
-import androidx.media3.exoplayer.source.ProgressiveMediaSource;
-import androidx.media3.datasource.DefaultHttpDataSource;
-import androidx.media3.datasource.DefaultDataSource;
-import androidx.media3.datasource.cache.CacheDataSource;
-import androidx.media3.datasource.cache.NoOpCacheEvictor;
-import androidx.media3.datasource.cache.SimpleCache;
-import androidx.media3.datasource.okhttp.OkHttpDataSource;
-import androidx.media3.exoplayer.ExoPlayer;
+import okhttp3.Response;
 
 public class DownloadManager {
 
     private static DownloadManager sInstance;
-    private static final String CACHE_DIR = "download_cache";
     private static final int BUFFER_SIZE = 64 * 1024;
     private static final int TIMEOUT = 30000;
 
     private final ConcurrentHashMap<String, DownloadTask> mTasks = new ConcurrentHashMap<>();
     private final Context mContext;
-    private SimpleCache mCache;
     private String mDownloadPath;
     private DownloadListener mListener;
 
@@ -66,6 +45,7 @@ public class DownloadManager {
         public String url;
         public String name;
         public String savePath;
+        public Map<String, String> headers;
         public int progress;
         public long downloaded;
         public long total;
@@ -74,11 +54,12 @@ public class DownloadManager {
         public Thread thread;
         public File outputFile;
 
-        public DownloadTask(String key, String url, String name, String savePath) {
+        public DownloadTask(String key, String url, String name, String savePath, Map<String, String> headers) {
             this.key = key;
             this.url = url;
             this.name = name;
             this.savePath = savePath;
+            this.headers = headers;
         }
     }
 
@@ -121,14 +102,13 @@ public class DownloadManager {
         if (TextUtils.isEmpty(name)) {
             name = "video";
         }
-        // 移除或替换非法字符
         name = name.replaceAll("[\\\\/:*?\"<>|]", "_");
         return name.trim();
     }
 
-    public void downloadVideo(String url, String title, String episodeName) {
+    public void downloadVideo(String url, Map<String, String> headers, String title, String episodeName) {
         if (TextUtils.isEmpty(url)) {
-            Notify.show("视频地址无效");
+            Notify.show(R.string.download_invalid_url);
             return;
         }
 
@@ -146,10 +126,60 @@ public class DownloadManager {
 
         String savePath = mDownloadPath + fileName;
 
-        DownloadTask task = new DownloadTask(key, url, fileName, savePath);
+        DownloadTask task = new DownloadTask(key, url, fileName, savePath, headers);
         mTasks.put(key, task);
 
         Task.execute(() -> startDownload(task));
+    }
+
+    public void downloadEpisode(String siteKey, String flag, Episode episode, String title) {
+        if (episode == null || TextUtils.isEmpty(episode.getUrl())) {
+            Notify.show(R.string.download_invalid_url);
+            return;
+        }
+
+        Task.execute(() -> {
+            try {
+                Result result = SiteApi.playerContent(siteKey, flag, episode.getUrl());
+                if (result == null || TextUtils.isEmpty(result.getRealUrl())) {
+                    notifyErrorMain("获取视频地址失败");
+                    return;
+                }
+
+                if (result.needParse()) {
+                    notifyErrorMain(App.get().getString(R.string.download_need_parse));
+                    return;
+                }
+
+                String realUrl = result.getRealUrl();
+                Map<String, String> headers = result.getHeader();
+
+                String key = realUrl.hashCode() + "";
+                if (mTasks.containsKey(key) && mTasks.get(key).downloading) {
+                    notifyMainThread(() -> Notify.show("正在下载中..."));
+                    return;
+                }
+
+                String fileName = sanitizeFileName(title);
+                if (!TextUtils.isEmpty(episode.getName())) {
+                    fileName += "_" + sanitizeFileName(episode.getName());
+                }
+                fileName += ".mp4";
+
+                String savePath = mDownloadPath + fileName;
+
+                DownloadTask task = new DownloadTask(key, realUrl, fileName, savePath, headers);
+                mTasks.put(key, task);
+
+                notifyMainThread(() -> Notify.show(App.get().getString(R.string.download_start, episode.getName())));
+
+                startDownload(task);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                notifyErrorMain("下载失败: " + e.getMessage());
+            }
+        });
     }
 
     private void startDownload(DownloadTask task) {
@@ -157,33 +187,50 @@ public class DownloadManager {
         task.thread = Thread.currentThread();
 
         try {
-            // 确保目录存在
             File dir = new File(mDownloadPath);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
 
-            URL url = new URL(task.url);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setConnectTimeout(TIMEOUT);
-            connection.setReadTimeout(TIMEOUT);
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 9; Build/PPR1.180610.011) AppleWebKit/537.36");
-            connection.setRequestProperty("Referer", "https://github.com/m3325599/TV");
-            connection.connect();
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new IOException("HTTP Error: " + responseCode);
-            }
-
-            task.total = connection.getContentLength();
-            if (task.total <= 0) {
-                task.total = 0; // 未知大小
-            }
-
             task.outputFile = new File(task.savePath);
+            if (task.outputFile.exists()) {
+                task.outputFile.delete();
+            }
 
-            try (InputStream input = connection.getInputStream();
+            downloadWithOkHttp(task);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            task.downloading = false;
+            final String error = e.getMessage();
+            notifyMainThread(() -> {
+                if (mListener != null) {
+                    mListener.onError(task.key, error);
+                }
+                Notify.show(App.get().getString(R.string.download_error, error));
+            });
+        } finally {
+            mTasks.remove(task.key);
+        }
+    }
+
+    private void downloadWithOkHttp(DownloadTask task) throws IOException {
+        try (Response response = OkHttp.newCall(task.url, task.headers).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("HTTP Error: " + response.code());
+            }
+
+            long contentLength = 0;
+            String contentLengthHeader = response.header("Content-Length");
+            if (contentLengthHeader != null) {
+                try {
+                    contentLength = Long.parseLong(contentLengthHeader);
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            task.total = contentLength;
+
+            try (InputStream input = response.body().byteStream();
                  FileOutputStream output = new FileOutputStream(task.outputFile)) {
 
                 byte[] buffer = new byte[BUFFER_SIZE];
@@ -199,9 +246,11 @@ public class DownloadManager {
                         task.progress = (int) ((totalRead * 100) / task.total);
                     }
 
-                    // 更新进度
                     if (mListener != null) {
-                        notifyProgress(task);
+                        final int progress = task.progress;
+                        final long downloaded = task.downloaded;
+                        final long total = task.total;
+                        notifyMainThread(() -> mListener.onProgress(task.key, progress, downloaded, total));
                     }
                 }
 
@@ -209,30 +258,15 @@ public class DownloadManager {
 
                 if (!task.cancelled) {
                     task.downloading = false;
-                    if (mListener != null) {
-                        notifyComplete(task);
-                    }
+                    final File file = task.outputFile;
                     notifyMainThread(() -> {
                         if (mListener != null) {
-                            mListener.onComplete(task.key, task.outputFile);
+                            mListener.onComplete(task.key, file);
                         }
-                        Notify.show("下载完成: " + task.name);
+                        Notify.show(App.get().getString(R.string.download_complete, task.name));
                     });
                 }
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            task.downloading = false;
-            final String error = e.getMessage();
-            notifyMainThread(() -> {
-                if (mListener != null) {
-                    mListener.onError(task.key, error);
-                }
-                Notify.show("下载失败: " + error);
-            });
-        } finally {
-            mTasks.remove(task.key);
         }
     }
 
@@ -261,30 +295,11 @@ public class DownloadManager {
         return task != null ? task.progress : 0;
     }
 
-    private void notifyProgress(DownloadTask task) {
-        notifyMainThread(() -> {
-            if (mListener != null) {
-                mListener.onProgress(task.key, task.progress, task.downloaded, task.total);
-            }
-        });
-    }
-
-    private void notifyComplete(DownloadTask task) {
-        notifyMainThread(() -> {
-            if (mListener != null) {
-                mListener.onComplete(task.key, task.outputFile);
-            }
-        });
-    }
-
     private void notifyMainThread(Runnable runnable) {
         App.post(runnable, 0);
     }
 
-    public void clearCache() {
-        if (mCache != null) {
-            mCache.release();
-            mCache = null;
-        }
+    private void notifyErrorMain(String error) {
+        notifyMainThread(() -> Notify.show(error));
     }
 }

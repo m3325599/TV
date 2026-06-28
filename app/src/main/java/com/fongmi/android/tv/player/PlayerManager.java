@@ -54,7 +54,7 @@ public class PlayerManager implements ParseCallback {
 
     public PlayerManager(Callback callback) {
         this.runnable = () -> callback.onError(ResUtil.getString(R.string.error_play_timeout));
-        this.engine = new ExoPlayerEngine(PlayerEngine.SOFT, listener);
+        this.engine = new ExoPlayerEngine(PlayerSetting.isHardDecode() ? PlayerEngine.HARD : PlayerEngine.SOFT, listener);
         this.player = engine.getPlayer();
         this.callback = callback;
     }
@@ -330,6 +330,7 @@ public class PlayerManager implements ParseCallback {
 
     public void toggleDecode() {
         engine.setDecode(engine.isHard() ? PlayerEngine.SOFT : PlayerEngine.HARD);
+        PlayerSetting.putHardDecode(engine.isHard());
         rebuildPlayer();
         setMediaItem();
     }
