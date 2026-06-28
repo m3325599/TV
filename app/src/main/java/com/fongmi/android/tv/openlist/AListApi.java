@@ -38,12 +38,6 @@ public class AListApi {
         this.token = token;
     }
 
-    private String getAuthHeader() {
-        if (TextUtils.isEmpty(token)) return "";
-        if (token.startsWith("Bearer ")) return token;
-        return "Bearer " + token;
-    }
-
     public String getServerUrl() {
         return serverUrl;
     }
@@ -119,7 +113,7 @@ public class AListApi {
                         .post(requestBody);
 
                 if (!TextUtils.isEmpty(token)) {
-                    builder.addHeader("Authorization", getAuthHeader());
+                    builder.addHeader("Authorization", token);
                 }
 
                 Response response = OkHttp.client().newCall(builder.build()).execute();
@@ -181,7 +175,7 @@ public class AListApi {
                         .post(requestBody);
 
                 if (!TextUtils.isEmpty(token)) {
-                    builder.addHeader("Authorization", getAuthHeader());
+                    builder.addHeader("Authorization", token);
                 }
 
                 Response response = OkHttp.client().newCall(builder.build()).execute();
@@ -236,7 +230,7 @@ public class AListApi {
         }
         String baseUrl = serverUrl + "d/" + filePath;
         if (!TextUtils.isEmpty(token)) {
-            baseUrl += "?sign=" + token;
+            baseUrl += "?token=" + token;
         }
         return baseUrl;
     }
@@ -264,7 +258,7 @@ public class AListApi {
                         .post(requestBody);
 
                 if (!TextUtils.isEmpty(token)) {
-                    builder.addHeader("Authorization", getAuthHeader());
+                    builder.addHeader("Authorization", token);
                 }
 
                 Response response = OkHttp.client().newCall(builder.build()).execute();
