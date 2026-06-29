@@ -1,6 +1,7 @@
 package com.fongmi.android.tv.player.engine;
 
 import android.net.Uri;
+import android.text.TextUtils;
 
 import androidx.media3.common.MediaMetadata;
 
@@ -19,6 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 public class PlaySpec {
+
+    // 网盘特殊User-Agent
+    private static final String UA_BAIDU_PAN = "pan.baidu.com";
+    private static final String UA_ALIYUN_PAN = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
     private Map<String, String> headers;
     private List<Danmaku> danmakus;
@@ -108,10 +113,45 @@ public class PlaySpec {
         this.metadata = metadata;
     }
 
+    /**
+     * 检查并设置必要的请求头
+     * 包括User-Agent和网盘特殊headers
+     */
     public PlaySpec checkUa() {
         if (headers == null) headers = new HashMap<>();
-        if (headers.keySet().stream().noneMatch(HttpHeaders.USER_AGENT::equalsIgnoreCase)) headers.put(HttpHeaders.USER_AGENT, Setting.getUa().isEmpty() ? PlayerHelper.getDefaultUa() : Setting.getUa());
+        // 检查是否需要设置网盘特殊User-Agent
+        String panUa = getPanUserAgent(url);
+        if (panUa != null) {
+            // 如果URL来自网盘，强制使用网盘UA
+            headers.put(HttpHeaders.USER_AGENT, panUa);
+        } else if (headers.keySet().stream().noneMatch(HttpHeaders.USER_AGENT::equalsIgnoreCase)) {
+            // 否则使用默认UA
+            headers.put(HttpHeaders.USER_AGENT, Setting.getUa().isEmpty() ? PlayerHelper.getDefaultUa() : Setting.getUa());
+        }
         return this;
+    }
+
+    /**
+     * 根据URL判断是否需要设置特殊的网盘User-Agent
+     * @param url 播放URL
+     * @return 需要的User-Agent，如果不需要则返回null
+     */
+    private String getPanUserAgent(String url) {
+        if (TextUtils.isEmpty(url)) return null;
+        String lowerUrl = url.toLowerCase();
+
+        // 百度网盘 - 需要User-Agent包含pan.baidu.com
+        if (lowerUrl.contains("baidu.com") || lowerUrl.contains("baidupcs.com")) {
+            return UA_BAIDU_PAN;
+        }
+
+        // 阿里云盘 - 需要浏览器UA
+        if (lowerUrl.contains("aliyundrive.com") || lowerUrl.contains("aliyun.com") ||
+            lowerUrl.contains("alicloud.com") || lowerUrl.contains("aliyuncs.com")) {
+            return UA_ALIYUN_PAN;
+        }
+
+        return null;
     }
 
     public void setSub(Sub sub) {
