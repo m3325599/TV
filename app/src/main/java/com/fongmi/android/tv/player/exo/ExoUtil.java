@@ -101,7 +101,6 @@ public class ExoUtil {
 
     private static LoadControl buildLoadControl() {
         int bufferMultiplier = PlayerSetting.getBuffer();
-        // 优化缓冲配置，提高播放流畅度和加载速度
         return new DefaultLoadControl.Builder()
                 .setBufferDurationsMs(
                         DefaultLoadControl.DEFAULT_MIN_BUFFER_MS * bufferMultiplier,
@@ -109,10 +108,7 @@ public class ExoUtil {
                         DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS,
                         DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS * bufferMultiplier
                 )
-                // 优先时间而不是大小阈值，确保播放流畅
                 .setPrioritizeTimeOverSizeThresholds(true)
-                // 允许使用内存中缓存，减少卡顿
-                .setUseSessionMemoryCache(true)
                 .build();
     }
 
@@ -123,11 +119,6 @@ public class ExoUtil {
         builder.setPreferredTextLanguage(Locale.getDefault().getISO3Language());
         builder.setTunnelingEnabled(PlayerSetting.isTunnel());
         builder.setForceHighestSupportedBitrate(false);
-        // 启用自适应播放以提高播放质量和稳定性
-        builder.setAllowVideoMixedMimeTypeAdaptiveness(true);
-        builder.setAllowAudioMixedMimeTypeAdaptiveness(true);
-        // 允许选择未确定的文本轨道
-        builder.setSelectUndeterminedText(true);
         trackSelector.setParameters(builder.build());
         return trackSelector;
     }
