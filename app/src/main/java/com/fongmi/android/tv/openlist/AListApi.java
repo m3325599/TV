@@ -11,7 +11,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.MediaType;
@@ -19,12 +21,19 @@ import okhttp3.Response;
 
 public class AListApi {
 
+    private static final long TIMEOUT_LONG = TimeUnit.SECONDS.toMillis(120); // 120秒超时
+    private static final int MAX_RETRIES = 2; // 最大重试次数
+
     private String serverUrl;
     private String token;
 
     public AListApi(String serverUrl, String token) {
         this.token = token;
         setServerUrl(serverUrl);
+    }
+
+    private OkHttpClient getClient(long timeout) {
+        return OkHttp.client(timeout);
     }
 
     public void setServerUrl(String url) {
@@ -65,7 +74,7 @@ public class AListApi {
                         .post(requestBody)
                         .build();
 
-                Response response = OkHttp.client().newCall(request).execute();
+                Response response = getClient(TIMEOUT_LONG).newCall(request).execute();
                 String result = response.body().string();
 
                 JSONObject json = new JSONObject(result);
@@ -93,6 +102,10 @@ public class AListApi {
     }
 
     public void listFiles(String path, ListCallback callback) {
+        listFilesWithRetry(path, callback, 0);
+    }
+
+    private void listFilesWithRetry(String path, ListCallback callback, int retryCount) {
         Task.execute(() -> {
             try {
                 String url = serverUrl + "api/fs/list";
@@ -116,7 +129,7 @@ public class AListApi {
                     builder.addHeader("Authorization", token);
                 }
 
-                Response response = OkHttp.client().newCall(builder.build()).execute();
+                Response response = getClient(TIMEOUT_LONG).newCall(builder.build()).execute();
                 String result = response.body().string();
 
                 JSONObject json = new JSONObject(result);
@@ -149,12 +162,21 @@ public class AListApi {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                App.post(() -> callback.onError(e.getMessage()));
+                // 如果是网络超时且还有重试次数，则重试
+                if (isNetworkError(e) && retryCount < MAX_RETRIES) {
+                    listFilesWithRetry(path, callback, retryCount + 1);
+                } else {
+                    App.post(() -> callback.onError(getErrorMessage(e)));
+                }
             }
         });
     }
 
     public void listFolders(String path, ListCallback callback) {
+        listFoldersWithRetry(path, callback, 0);
+    }
+
+    private void listFoldersWithRetry(String path, ListCallback callback, int retryCount) {
         Task.execute(() -> {
             try {
                 String url = serverUrl + "api/fs/list";
@@ -178,7 +200,7 @@ public class AListApi {
                     builder.addHeader("Authorization", token);
                 }
 
-                Response response = OkHttp.client().newCall(builder.build()).execute();
+                Response response = getClient(TIMEOUT_LONG).newCall(builder.build()).execute();
                 String result = response.body().string();
 
                 JSONObject json = new JSONObject(result);
@@ -209,7 +231,11 @@ public class AListApi {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                App.post(() -> callback.onError(e.getMessage()));
+                if (isNetworkError(e) && retryCount < MAX_RETRIES) {
+                    listFoldersWithRetry(path, callback, retryCount + 1);
+                } else {
+                    App.post(() -> callback.onError(getErrorMessage(e)));
+                }
             }
         });
     }
@@ -241,6 +267,10 @@ public class AListApi {
     }
 
     public void getFsUrl(String path, FsGetCallback callback) {
+        getFsUrlWithRetry(path, callback, 0);
+    }
+
+    private void getFsUrlWithRetry(String path, FsGetCallback callback, int retryCount) {
         Task.execute(() -> {
             try {
                 String url = serverUrl + "api/fs/get";
@@ -261,7 +291,7 @@ public class AListApi {
                     builder.addHeader("Authorization", token);
                 }
 
-                Response response = OkHttp.client().newCall(builder.build()).execute();
+                Response response = getClient(TIMEOUT_LONG).newCall(builder.build()).execute();
                 String result = response.body().string();
 
                 JSONObject json = new JSONObject(result);
@@ -282,9 +312,47 @@ public class AListApi {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                App.post(() -> callback.onError(e.getMessage()));
+                if (isNetworkError(e) && retryCount < MAX_RETRIES) {
+                    getFsUrlWithRetry(path, callback, retryCount + 1);
+                } else {
+                    App.post(() -> callback.onError(getErrorMessage(e)));
+                }
             }
         });
+    }
+
+    /**
+     * 判断是否为网络相关错误（超时、连接失败等）
+     */
+    private boolean isNetworkError(Exception e) {
+        String message = e.getMessage();
+        if (message == null) return false;
+        message = message.toLowerCase();
+        return message.contains("timeout") ||
+               message.contains("connection") ||
+               message.contains("network") ||
+               message.contains("connect") ||
+               message.contains("failed to connect") ||
+               message.contains("socket");
+    }
+
+    /**
+     * 获取更友好的错误消息
+     */
+    private String getErrorMessage(Exception e) {
+        String message = e.getMessage();
+        if (message == null) return "Unknown error";
+        message = message.toLowerCase();
+        if (message.contains("timeout")) {
+            return "连接超时，请检查网络或服务器状态";
+        }
+        if (message.contains("connection")) {
+            return "无法连接到服务器，请检查服务器地址";
+        }
+        if (message.contains("ssl")) {
+            return "SSL证书错误，请检查服务器配置";
+        }
+        return e.getMessage();
     }
 
     public static class AListFile {
