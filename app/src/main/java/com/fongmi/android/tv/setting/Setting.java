@@ -123,11 +123,10 @@ public class Setting {
     }
 
     public static int getWallColor() {
-        return Prefers.getInt("wall_color", 0);
+        return 0xFF40C090;
     }
 
     public static void putWallColor(int color) {
-        Prefers.put("wall_color", color);
     }
 
     public static int getDynamicColor() {

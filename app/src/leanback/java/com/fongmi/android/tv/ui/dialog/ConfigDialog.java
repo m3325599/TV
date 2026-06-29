@@ -14,7 +14,6 @@ import androidx.viewbinding.ViewBinding;
 import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.api.config.LiveConfig;
 import com.fongmi.android.tv.api.config.VodConfig;
-import com.fongmi.android.tv.api.config.WallConfig;
 import com.fongmi.android.tv.bean.Config;
 import com.fongmi.android.tv.databinding.DialogConfigBinding;
 import com.fongmi.android.tv.event.ServerEvent;
@@ -107,7 +106,6 @@ public class ConfigDialog extends BaseAlertDialog {
         return switch (type) {
             case 0 -> VodConfig.getUrl();
             case 1 -> LiveConfig.getUrl();
-            case 2 -> WallConfig.getUrl();
             default -> "";
         };
     }
