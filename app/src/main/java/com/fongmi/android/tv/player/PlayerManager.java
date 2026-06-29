@@ -329,8 +329,11 @@ public class PlayerManager implements ParseCallback {
     }
 
     public void toggleDecode() {
-        engine.setDecode(engine.isHard() ? PlayerEngine.SOFT : PlayerEngine.HARD);
+        boolean wasHard = engine.isHard();
+        engine.setDecode(wasHard ? PlayerEngine.SOFT : PlayerEngine.HARD);
         PlayerSetting.putHardDecode(engine.isHard());
+        // 显示解码切换提示
+        Notify.show(wasHard ? R.string.decode_switch_to_soft : R.string.decode_switch_to_hard);
         rebuildPlayer();
         setMediaItem();
     }
@@ -450,12 +453,17 @@ public class PlayerManager implements ParseCallback {
             PlayerEngine.ErrorAction action = engine.handleError(e);
             if (action == PlayerEngine.ErrorAction.RECOVERED) {
                 setDanmakus(spec.getDanmakus());
+            } else if (action == PlayerEngine.ErrorAction.DECODE) {
+                // 解码失败：尝试切换解码模式，只在切换后仍失败才显示错误
+                if (retry == 0) {
+                    retry = 1;
+                    toggleDecode();
+                } else {
+                    // 已经尝试过切换解码模式，显示最终错误
+                    callback.onError(engine.getErrorMessage(e));
+                }
             } else if (action == PlayerEngine.ErrorAction.FATAL) {
                 callback.onError(engine.getErrorMessage(e));
-            } else if (++retry > 1) {
-                callback.onError(engine.getErrorMessage(e));
-            } else {
-                toggleDecode();
             }
         }
     };

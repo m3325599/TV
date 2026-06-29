@@ -247,6 +247,9 @@
         <item>Hard</item>
     </string-array>
 
+    <string name="decode_switch_to_soft">Hard decode failed, switched to soft decode</string>
+    <string name="decode_switch_to_hard">Soft decode failed, switched to hard decode</string>
+
     <string-array name="select_render">
         <item>Surface</item>
         <item>Texture</item>

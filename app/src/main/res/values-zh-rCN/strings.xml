@@ -230,6 +230,9 @@
         <item>硬解</item>
     </string-array>
 
+    <string name="decode_switch_to_soft">硬解码失败，已切换到软解码</string>
+    <string name="decode_switch_to_hard">软解码失败，已切换到硬解码</string>
+
     <string-array name="select_size">
         <item>小</item>
         <item>中</item>
