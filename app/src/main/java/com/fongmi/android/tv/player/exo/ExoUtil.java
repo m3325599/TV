@@ -17,8 +17,6 @@ import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.LoadControl;
 import androidx.media3.exoplayer.RenderersFactory;
-import androidx.media3.exoplayer.mediacodec.MediaCodecSelector;
-import androidx.media3.exoplayer.mediacodec.MediaCodecUtil;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.exoplayer.trackselection.TrackSelector;
@@ -132,38 +130,7 @@ public class ExoUtil {
         NextRenderersFactory factory = new NextRenderersFactory(App.get());
         factory.setEnableDecoderFallback(true);
         factory.setExtensionRendererMode(renderMode);
-        factory.setMediaCodecSelector(buildMediaCodecSelector());
-        factory.setEnableDecoderFallback(true);
         return factory;
-    }
-
-    private static MediaCodecSelector buildMediaCodecSelector() {
-        return new MediaCodecSelector() {
-            @Override
-            public android.media.MediaCodecInfo getDecoderInfo(String mimeType, boolean requiresSecureDecoder, boolean requiresTunnelingDecoder) throws MediaCodecUtil.DecoderQueryException {
-                android.media.MediaCodecInfo info = MediaCodecUtil.getDecoderInfo(mimeType, requiresSecureDecoder, requiresTunnelingDecoder);
-                return info;
-            }
-            @Override
-            public List<android.media.MediaCodecInfo> getDecoderInfos(String mimeType, boolean requiresSecureDecoder, boolean requiresTunnelingDecoder) throws MediaCodecUtil.DecoderQueryException {
-                List<android.media.MediaCodecInfo> infos = MediaCodecUtil.getDecoderInfos(mimeType, requiresSecureDecoder, requiresTunnelingDecoder);
-                List<android.media.MediaCodecInfo> sorted = new ArrayList<>();
-                List<android.media.MediaCodecInfo> software = new ArrayList<>();
-                for (android.media.MediaCodecInfo info : infos) {
-                    if (info.isHardwareAccelerated()) {
-                        sorted.add(info);
-                    } else {
-                        software.add(info);
-                    }
-                }
-                sorted.addAll(software);
-                return sorted;
-            }
-            @Override
-            public android.media.MediaCodecInfo getPassthroughDecoderInfo() throws MediaCodecUtil.DecoderQueryException {
-                return MediaCodecUtil.getPassthroughDecoderInfo();
-            }
-        };
     }
 
     private static MediaSource.Factory buildMediaSourceFactory() {
