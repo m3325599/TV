@@ -197,6 +197,7 @@ public class SiteApi {
             return result;
         } else {
             ArrayMap<String, String> params = new ArrayMap<>();
+            params.put("ac", ac(site.getType()));
             params.put("wd", keyword);
             params.put("quick", String.valueOf(quick));
             params.put("extend", "");

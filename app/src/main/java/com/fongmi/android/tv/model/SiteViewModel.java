@@ -107,6 +107,12 @@ public class SiteViewModel extends ViewModel {
             future.addCallback(Task.callback(
                     result -> {
                         if (searchEpoch.get() == epoch) search.postValue(result);
+                    },
+                    error -> {
+                        if (searchEpoch.get() == epoch) {
+                            error.printStackTrace();
+                            search.postValue(Result.empty());
+                        }
                     }
             ), MoreExecutors.directExecutor());
         });

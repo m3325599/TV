@@ -159,6 +159,7 @@ public class Action implements Process {
         String name = params.get("name");
         String type = params.get("type");
         if (TextUtils.isEmpty(text)) return;
+        ServerEvent.setting(text, name);
         if ("live".equals(type)) {
             Config config = Config.find(text, name, 1);
             LiveConfig.load(config, new Callback() {
