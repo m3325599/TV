@@ -17,9 +17,11 @@ import com.fongmi.android.tv.Product;
 import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.bean.Collect;
 import com.fongmi.android.tv.bean.Result;
+import com.fongmi.android.tv.bean.Site;
 import com.fongmi.android.tv.bean.Vod;
 import com.fongmi.android.tv.databinding.FragmentTypeBinding;
 import com.fongmi.android.tv.model.SiteViewModel;
+import com.fongmi.android.tv.ui.activity.CollectActivity;
 import com.fongmi.android.tv.ui.activity.VideoActivity;
 import com.fongmi.android.tv.ui.activity.VodActivity;
 import com.fongmi.android.tv.ui.base.BaseFragment;
@@ -73,6 +75,20 @@ public class CollectFragment extends BaseFragment implements CustomScroller.Call
             showProgress();
         }
         addVideo(mCollect);
+        loadCachedResults();
+    }
+
+    private void loadCachedResults() {
+        if (mCollect == null || !"all".equals(mCollect.getSite().getKey())) return;
+        if (getActivity() == null || !(getActivity() instanceof CollectActivity)) return;
+        CollectActivity activity = (CollectActivity) getActivity();
+        List<Vod> cached = activity.getSearchResults();
+        if (!cached.isEmpty()) {
+            addVideo(cached);
+        }
+        if (activity.isSearchCompleted() && cached.isEmpty()) {
+            showEmpty();
+        }
     }
 
     private void setRecyclerView() {

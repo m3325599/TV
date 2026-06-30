@@ -23,6 +23,7 @@ import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.api.config.VodConfig;
 import com.fongmi.android.tv.bean.Collect;
 import com.fongmi.android.tv.bean.Site;
+import com.fongmi.android.tv.bean.Vod;
 import com.fongmi.android.tv.databinding.ActivityCollectBinding;
 import com.fongmi.android.tv.model.SiteViewModel;
 import com.fongmi.android.tv.setting.Setting;
@@ -45,6 +46,7 @@ public class CollectActivity extends BaseActivity {
     private int mTotalSites;
     private int mCompletedSites;
     private boolean mHasResult;
+    private List<Vod> mSearchResults;
 
     public static void start(Activity activity, String keyword) {
         Intent intent = new Intent(activity, CollectActivity.class);
@@ -54,6 +56,14 @@ public class CollectActivity extends BaseActivity {
 
     private CollectFragment getFragment() {
         return (CollectFragment) mBinding.pager.getAdapter().instantiateItem(mBinding.pager, 0);
+    }
+
+    public List<Vod> getSearchResults() {
+        return mSearchResults == null ? new ArrayList<>() : mSearchResults;
+    }
+
+    public boolean isSearchCompleted() {
+        return mCompletedSites >= mTotalSites && mTotalSites > 0;
     }
 
     private String getKeyword() {
@@ -70,10 +80,11 @@ public class CollectActivity extends BaseActivity {
         super.onNewIntent(intent);
         getIntent().putExtras(intent);
         mAdapter.clear();
+        mSearchResults = new ArrayList<>();
         setPager();
         search();
         CollectFragment fragment = getFragment();
-        if (fragment != null) fragment.resetForNewSearch();
+        if (fragment != null && fragment.isAdded()) fragment.resetForNewSearch();
     }
 
     @Override
@@ -115,12 +126,20 @@ public class CollectActivity extends BaseActivity {
             mCompletedSites++;
             if (!result.getList().isEmpty()) {
                 mHasResult = true;
-                getFragment().addVideo(result.getList());
+                if (mSearchResults == null) mSearchResults = new ArrayList<>();
+                mSearchResults.addAll(result.getList());
+                CollectFragment fragment = getFragment();
+                if (fragment != null && fragment.isAdded()) {
+                    fragment.addVideo(result.getList());
+                }
                 mAdapter.add(Collect.create(result.getList()));
                 mBinding.pager.getAdapter().notifyDataSetChanged();
             }
             if (mCompletedSites >= mTotalSites && !mHasResult) {
-                getFragment().showEmpty();
+                CollectFragment fragment = getFragment();
+                if (fragment != null && fragment.isAdded()) {
+                    fragment.showEmpty();
+                }
             }
         });
     }
@@ -146,6 +165,7 @@ public class CollectActivity extends BaseActivity {
         mTotalSites = mSites.size();
         mCompletedSites = 0;
         mHasResult = false;
+        mSearchResults = new ArrayList<>();
         mAdapter.add(Collect.all());
         mBinding.pager.getAdapter().notifyDataSetChanged();
         mBinding.result.setText(getString(R.string.collect_result, getKeyword()));
