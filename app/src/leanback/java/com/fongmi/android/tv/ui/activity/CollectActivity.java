@@ -42,6 +42,9 @@ public class CollectActivity extends BaseActivity {
     private SiteViewModel mViewModel;
     private List<Site> mSites;
     private View mOldView;
+    private int mTotalSites;
+    private int mCompletedSites;
+    private boolean mHasResult;
 
     public static void start(Activity activity, String keyword) {
         Intent intent = new Intent(activity, CollectActivity.class);
@@ -107,10 +110,16 @@ public class CollectActivity extends BaseActivity {
     private void setViewModel() {
         mViewModel = new ViewModelProvider(this).get(SiteViewModel.class);
         mViewModel.getSearch().observe(this, result -> {
-            if (result.getList().isEmpty()) return;
-            getFragment().addVideo(result.getList());
-            mAdapter.add(Collect.create(result.getList()));
-            mBinding.pager.getAdapter().notifyDataSetChanged();
+            mCompletedSites++;
+            if (!result.getList().isEmpty()) {
+                mHasResult = true;
+                getFragment().addVideo(result.getList());
+                mAdapter.add(Collect.create(result.getList()));
+                mBinding.pager.getAdapter().notifyDataSetChanged();
+            }
+            if (mCompletedSites >= mTotalSites && !mHasResult) {
+                getFragment().showEmpty();
+            }
         });
     }
 
@@ -132,9 +141,13 @@ public class CollectActivity extends BaseActivity {
 
     private void search() {
         if (mSites.isEmpty()) return;
+        mTotalSites = mSites.size();
+        mCompletedSites = 0;
+        mHasResult = false;
         mAdapter.add(Collect.all());
         mBinding.pager.getAdapter().notifyDataSetChanged();
         mBinding.result.setText(getString(R.string.collect_result, getKeyword()));
+        getFragment().showProgress();
         mViewModel.searchContent(mSites, getKeyword(), false);
     }
 

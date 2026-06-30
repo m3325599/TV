@@ -105,6 +105,7 @@ public class CollectFragment extends BaseFragment implements CustomScroller.Call
 
     public void addVideo(List<Vod> items) {
         if (checkLastSize(items) || getActivity() == null || getActivity().isFinishing()) return;
+        showContent();
         List<ListRow> rows = new ArrayList<>();
         VodPresenter presenter = new VodPresenter(this);
         for (List<Vod> part : Lists.partition(items, Product.getColumn())) {
@@ -113,6 +114,18 @@ public class CollectFragment extends BaseFragment implements CustomScroller.Call
             rows.add(new ListRow(mLast));
         }
         mAdapter.addAll(mAdapter.size(), rows);
+    }
+
+    public void showProgress() {
+        mBinding.progressLayout.showProgress();
+    }
+
+    public void showEmpty() {
+        mBinding.progressLayout.showEmpty();
+    }
+
+    public void showContent() {
+        mBinding.progressLayout.showContent();
     }
 
     @Override

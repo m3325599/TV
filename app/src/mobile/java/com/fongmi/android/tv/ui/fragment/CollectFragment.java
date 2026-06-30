@@ -41,6 +41,9 @@ public class CollectFragment extends BaseFragment implements MenuProvider, Colle
     private CustomScroller mScroller;
     private SiteViewModel mViewModel;
     private List<Site> mSites;
+    private int mTotalSites;
+    private int mCompletedSites;
+    private boolean mHasResult;
 
     public static CollectFragment newInstance(String keyword) {
         Bundle args = new Bundle();
@@ -124,6 +127,10 @@ public class CollectFragment extends BaseFragment implements MenuProvider, Colle
 
     private void search() {
         if (mSites.isEmpty()) return;
+        mTotalSites = mSites.size();
+        mCompletedSites = 0;
+        mHasResult = false;
+        mBinding.progressLayout.showProgress();
         mCollectAdapter.setItems(List.of(Collect.all()), () -> mViewModel.searchContent(mSites, getKeyword(), false));
     }
 
@@ -134,7 +141,15 @@ public class CollectFragment extends BaseFragment implements MenuProvider, Colle
     }
 
     private void setCollect(Result result) {
-        if (result == null || result.getList().isEmpty()) return;
+        mCompletedSites++;
+        if (result == null || result.getList().isEmpty()) {
+            if (mCompletedSites >= mTotalSites && !mHasResult) {
+                mBinding.progressLayout.showEmpty();
+            }
+            return;
+        }
+        mHasResult = true;
+        mBinding.progressLayout.showContent();
         if (mCollectAdapter.getPosition() == 0) mSearchAdapter.addAll(result.getList());
         mCollectAdapter.add(Collect.create(result.getList()));
         mCollectAdapter.add(result.getList());
