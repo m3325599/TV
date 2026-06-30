@@ -72,6 +72,8 @@ public class CollectActivity extends BaseActivity {
         mAdapter.clear();
         setPager();
         search();
+        CollectFragment fragment = getFragment();
+        if (fragment != null) fragment.resetForNewSearch();
     }
 
     @Override
@@ -147,7 +149,6 @@ public class CollectActivity extends BaseActivity {
         mAdapter.add(Collect.all());
         mBinding.pager.getAdapter().notifyDataSetChanged();
         mBinding.result.setText(getString(R.string.collect_result, getKeyword()));
-        getFragment().showProgress();
         mViewModel.searchContent(mSites, getKeyword(), false);
     }
 

@@ -69,6 +69,9 @@ public class CollectFragment extends BaseFragment implements CustomScroller.Call
     protected void initView() {
         setRecyclerView();
         setViewModel();
+        if (mCollect != null && "all".equals(mCollect.getSite().getKey())) {
+            showProgress();
+        }
         addVideo(mCollect);
     }
 
@@ -117,15 +120,22 @@ public class CollectFragment extends BaseFragment implements CustomScroller.Call
     }
 
     public void showProgress() {
-        mBinding.progressLayout.showProgress();
+        if (mBinding != null && mBinding.progressLayout != null) mBinding.progressLayout.showProgress();
     }
 
     public void showEmpty() {
-        mBinding.progressLayout.showEmpty();
+        if (mBinding != null && mBinding.progressLayout != null) mBinding.progressLayout.showEmpty();
     }
 
     public void showContent() {
-        mBinding.progressLayout.showContent();
+        if (mBinding != null && mBinding.progressLayout != null) mBinding.progressLayout.showContent();
+    }
+
+    public void resetForNewSearch() {
+        if (mBinding == null || mAdapter == null) return;
+        mAdapter.clear();
+        mLast = null;
+        showProgress();
     }
 
     @Override

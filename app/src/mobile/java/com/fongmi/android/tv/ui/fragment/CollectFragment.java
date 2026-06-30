@@ -142,6 +142,7 @@ public class CollectFragment extends BaseFragment implements MenuProvider, Colle
 
     private void setCollect(Result result) {
         mCompletedSites++;
+        if (mBinding == null || mBinding.progressLayout == null) return;
         if (result == null || result.getList().isEmpty()) {
             if (mCompletedSites >= mTotalSites && !mHasResult) {
                 mBinding.progressLayout.showEmpty();
