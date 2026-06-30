@@ -17,6 +17,8 @@ import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.LoadControl;
 import androidx.media3.exoplayer.RenderersFactory;
+import androidx.media3.exoplayer.mediacodec.MediaCodecSelector;
+import androidx.media3.exoplayer.mediacodec.MediaCodecUtil;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.exoplayer.trackselection.TrackSelector;
@@ -91,8 +93,7 @@ public class ExoUtil {
     }
 
     private static int getRenderMode(int decode) {
-        // 优先使用扩展渲染器以获得更好的解码兼容性，同时启用硬件加速
-        return DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER;
+        return decode == PlayerEngine.SOFT ? DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON : DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER;
     }
 
     private static CaptionStyleCompat getCaptionStyle() {
@@ -101,14 +102,14 @@ public class ExoUtil {
 
     private static LoadControl buildLoadControl() {
         int bufferMultiplier = PlayerSetting.getBuffer();
+        int minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS * bufferMultiplier;
+        int maxBufferMs = Math.max(DefaultLoadControl.DEFAULT_MAX_BUFFER_MS * bufferMultiplier, 50000);
+        int bufferForPlaybackMs = Math.min(DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS, 1500);
+        int bufferForPlaybackAfterRebufferMs = Math.min(DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS * bufferMultiplier, 3000);
         return new DefaultLoadControl.Builder()
-                .setBufferDurationsMs(
-                        DefaultLoadControl.DEFAULT_MIN_BUFFER_MS * bufferMultiplier,
-                        DefaultLoadControl.DEFAULT_MAX_BUFFER_MS * bufferMultiplier,
-                        DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS,
-                        DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS * bufferMultiplier
-                )
+                .setBufferDurationsMs(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs)
                 .setPrioritizeTimeOverSizeThresholds(true)
+                .setBackBuffer(/* backBufferDurationMs= */ 30000, /* retainBackBufferFromKeyframe= */ true)
                 .build();
     }
 
@@ -119,18 +120,50 @@ public class ExoUtil {
         builder.setPreferredTextLanguage(Locale.getDefault().getISO3Language());
         builder.setTunnelingEnabled(PlayerSetting.isTunnel());
         builder.setForceHighestSupportedBitrate(false);
+        builder.setAllowVideoMixedMimeTypeAdaptiveness(true);
+        builder.setAllowVideoNonSeamlessAdaptiveness(true);
+        builder.setAllowAudioMixedMimeTypeAdaptiveness(true);
+        builder.setAllowAudioMixedSampleRateAdaptiveness(true);
         trackSelector.setParameters(builder.build());
         return trackSelector;
     }
 
     private static RenderersFactory buildRenderersFactory(int renderMode) {
-        // 使用NextRenderersFactory增强解码能力，支持FFmpeg解码器，提供更好的兼容性和解码质量
         NextRenderersFactory factory = new NextRenderersFactory(App.get());
-        // 启用解码器回退机制，当首选解码器失败时自动尝试备用解码器
         factory.setEnableDecoderFallback(true);
-        // 设置扩展渲染器模式，优先使用扩展渲染器以获得更好的解码支持
-        factory.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
+        factory.setExtensionRendererMode(renderMode);
+        factory.setMediaCodecSelector(buildMediaCodecSelector());
+        factory.setEnableDecoderFallback(true);
         return factory;
+    }
+
+    private static MediaCodecSelector buildMediaCodecSelector() {
+        return new MediaCodecSelector() {
+            @Override
+            public android.media.MediaCodecInfo getDecoderInfo(String mimeType, boolean requiresSecureDecoder, boolean requiresTunnelingDecoder) throws MediaCodecUtil.DecoderQueryException {
+                android.media.MediaCodecInfo info = MediaCodecUtil.getDecoderInfo(mimeType, requiresSecureDecoder, requiresTunnelingDecoder);
+                return info;
+            }
+            @Override
+            public List<android.media.MediaCodecInfo> getDecoderInfos(String mimeType, boolean requiresSecureDecoder, boolean requiresTunnelingDecoder) throws MediaCodecUtil.DecoderQueryException {
+                List<android.media.MediaCodecInfo> infos = MediaCodecUtil.getDecoderInfos(mimeType, requiresSecureDecoder, requiresTunnelingDecoder);
+                List<android.media.MediaCodecInfo> sorted = new ArrayList<>();
+                List<android.media.MediaCodecInfo> software = new ArrayList<>();
+                for (android.media.MediaCodecInfo info : infos) {
+                    if (info.isHardwareAccelerated()) {
+                        sorted.add(info);
+                    } else {
+                        software.add(info);
+                    }
+                }
+                sorted.addAll(software);
+                return sorted;
+            }
+            @Override
+            public android.media.MediaCodecInfo getPassthroughDecoderInfo() throws MediaCodecUtil.DecoderQueryException {
+                return MediaCodecUtil.getPassthroughDecoderInfo();
+            }
+        };
     }
 
     private static MediaSource.Factory buildMediaSourceFactory() {
